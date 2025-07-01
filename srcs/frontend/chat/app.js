@@ -1,7 +1,10 @@
 import { openProfile } from "../profile.js";
 
+let __CURRENT_USER_ID = null;
+window.__CURRENT_USER_ID = null;
+let _navProfileInitDone = false;
 
-(function() {
+export function initNavProfile() {
 let ws;
 let userInfoGlobal;
 
@@ -18,9 +21,13 @@ if (!buf) {
 }
 userInfoGlobal = JSON.parse(buf);
 
-let __CURRENT_USER_ID = null;
-window.__CURRENT_USER_ID = null;
-(async () => {
+const avatarEl = document.getElementById("navAvatar");
+if (avatarEl) {
+  avatarEl.dataset.userid = userInfoGlobal.id;
+  avatarEl.classList.add("view-profile", "cursor-pointer");
+}
+
+  (async () => {
    /* Pull token from the userInfo blob and expose it */
    const userInfo = userInfoGlobal;
    localStorage.setItem("token", userInfo.token);          // <-- make profile.js happy
@@ -34,11 +41,13 @@ window.__CURRENT_USER_ID = null;
    const nameEl = document.getElementById('navUsername');
 	nameEl.dataset.userid = me.id;                // same id as avatar
 	nameEl.classList.add('view-profile', 'cursor-pointer');
+
 })();
 
-document.body.addEventListener("click", e => {
-	const t = e.target.closest(".view-profile");
-	if (!t) return;
+  if (!_navProfileInitDone) {
+    document.body.addEventListener("click", e => {
+        const t = e.target.closest(".view-profile");
+        if (!t) return;
 
 	// parse & validate
 	const raw = t.dataset.userid;
@@ -48,13 +57,18 @@ document.body.addEventListener("click", e => {
 		return;
 	}
 	
-		openProfile(userId);
-	});
 
-document.getElementById("view-my-profile")?.addEventListener("click", () => {
-	if (window.__CURRENT_USER_ID)
-		openProfile(window.__CURRENT_USER_ID);
-});
+                openProfile(userId);
+        });
+
+    document.getElementById("view-my-profile")?.addEventListener("click", () => {
+        if (window.__CURRENT_USER_ID)
+                openProfile(window.__CURRENT_USER_ID);
+    });
+
+    _navProfileInitDone = true;
+  }
+
 
 const messages = document.getElementById("messages");
 const messageInput = document.getElementById("messageInput");
@@ -69,5 +83,6 @@ if (nameEl) {
   nameEl.dataset.userid = userInfoGlobal.id;
   nameEl.classList.add("view-profile", "cursor-pointer");
 }
+}
 
-  })();
+initNavProfile();

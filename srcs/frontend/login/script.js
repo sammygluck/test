@@ -1,6 +1,7 @@
 import { handleRouteChange } from "../router.js";
 import { connectGameServer, disconnectGameServer, } from "../tournament/script.js";
 import { connectChat, disconnectChat } from "../chat/chatWSocket.js";
+import { initNavProfile } from "../chat/app.js";
 let isLogin = true;
 function toggleForm() {
     isLogin = !isLogin;
@@ -63,6 +64,7 @@ async function authenticate() {
                 handleRouteChange();
                 connectGameServer();
                 connectChat();
+                initNavProfile();
             }
             else if (isLogin &&
                 data.message &&
@@ -123,6 +125,7 @@ async function twoFactorAuthenticate() {
             handleRouteChange();
             connectGameServer();
             connectChat();
+            initNavProfile();
         }
         else {
             messageDisplay.textContent = data.error || "Verification failed.";
