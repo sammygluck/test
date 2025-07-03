@@ -12,7 +12,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet"/>
 
-  <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-gradient-to-br from-[#0d032a] via-[#101040] to-[#120920] text-gray-200">
 
@@ -57,9 +56,9 @@
   <div id="loginPage" class="route-view hidden flex items-center justify-center h-screen bg-gray-100">
     <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full">
       <h2 id="auth-form-title" class="text-2xl font-semibold mb-4">Login</h2>
-      <input type="text" id="auth-username" placeholder="Username" required class="w-full p-2.5 mb-4 border border-gray-300 rounded hidden text-gray-900"/>
-      <input type="email" id="auth-email" placeholder="Email" required class="w-full p-2.5 mb-4 border border-gray-300 rounded text-gray-900"/>
-      <input type="password" id="auth-password" placeholder="Password" required class="w-full p-2.5 mb-4 border border-gray-300 rounded text-gray-900"/>
+      <input type="text" id="auth-username" placeholder="Username" required class="w-full p-2.5 mb-4 border border-gray-300 rounded hidden text-blue-950"/>
+      <input type="email" id="auth-email" placeholder="Email" required class="w-full p-2.5 mb-4 border border-gray-300 rounded text-blue-950"/>
+      <input type="password" id="auth-password" placeholder="Password" required class="w-full p-2.5 mb-4 border border-gray-300 rounded text-blue-950"/>
       <div class="flex items-center mb-4 hidden" id="auth-2fa-checkbox">
         <input type="checkbox" id="enable-2fa" class="mr-2" />
         <label for="enable-2fa" class="text-sm text-gray-700">Enable 2-Factor Authentication</label>
@@ -79,7 +78,7 @@
     <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full">
       <h2 class="text-2xl font-semibold mb-4">Two-Factor Authentication</h2>
       <p class="mb-4 text-gray-600">Enter the 6-digit code sent to your email.</p>
-      <input type="text" id="auth-2fa-code" placeholder="Enter 2FA code" maxlength="6" pattern="\d{6}" required class="w-full p-2.5 mb-4 border border-gray-300 rounded text-center tracking-widest text-lg text-gray-900"/>
+      <input type="text" id="auth-2fa-code" placeholder="Enter 2FA code" maxlength="6" pattern="\d{6}" required class="w-full p-2.5 mb-4 border border-gray-300 rounded text-center tracking-widest text-lg text-blue-950"/>
       <button id="auth-2fa-button" class="w-full py-2.5 bg-green-500 text-white font-medium rounded hover:bg-green-600 transition-colors">Verify Code</button>
       <p id="auth-2fa-message" class="text-red-500 mt-2"></p>
       <p id="auth-2fa-back" class="mt-4 text-blue-500 hover:text-blue-700 cursor-pointer">Back to Login</p>
@@ -91,7 +90,7 @@
     <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full">
       <h2 class="text-2xl font-semibold mb-4">Choose a Username</h2>
       <p class="mb-4 text-gray-600">Create a unique username for your account.</p>
-      <input type="text" id="username-input" placeholder="Enter your username" maxlength="20" pattern="^[a-zA-Z0-9_]{3,20}$" required class="w-full p-2.5 mb-4 border border-gray-300 rounded text-center text-lg text-gray-900"/>
+      <input type="text" id="username-input" placeholder="Enter your username" maxlength="20" pattern="^[a-zA-Z0-9_]{3,20}$" required class="w-full p-2.5 mb-4 border border-gray-300 rounded text-center text-lg text-blue-950"/>
       <button id="username-submit-button" class="w-full py-2.5 bg-blue-500 text-white font-medium rounded hover:bg-blue-600 transition-colors">Save Username</button>
       <p id="username-message" class="text-red-500 mt-2"></p>
     </div>
@@ -103,7 +102,7 @@
       <h2 class="text-xl font-bold mb-4">Tournaments</h2>
       <ul id="tournamentList" class="space-y-2 overflow-auto max-h-full flex-1"></ul>
       <form id="createTournamentForm" class="mt-6">
-        <input type="text" id="tournamentName" class="w-full p-2 border rounded mb-2 text-gray-900" placeholder="New Tournament" required/>
+        <input type="text" id="tournamentName" class="w-full p-2 border rounded mb-2 text-blue-950" placeholder="New Tournament" required/>
         <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Create</button>
       </form>
     </div>
@@ -125,30 +124,30 @@
         <img id="player1Avatar" src="/default-avatar.svg" alt="Player 1 Avatar" class="w-10 h-10 rounded-full object-cover"/>
         <span id="player1Name" class="text-lg font-medium">Player1</span>
       </div>
-      <div id="scoreDisplay" class="text-2xl font-bold">0 - 0</div>
-      <div id="countDownDisplay" class="text-2xl font-bold hidden">5</div>
+      <div id="scoreDisplay" class="text-2xl font-bold filter">0 - 0</div>
+      <div id="countDownDisplay" class="text-2xl font-bold hidden filter drop-shadow-[0_0_6px_#ff2d95]">5</div>
       <div class="flex items-center gap-3">
         <span id="player2Name" class="text-lg font-medium">Player2</span>
         <img id="player2Avatar" src="/default-avatar.svg" alt="Player 2 Avatar" class="w-10 h-10 rounded-full object-cover"/>
       </div>
     </div>
-    <canvas id="pongCanvas" class="w-full h-full block border" width="800" height="400"></canvas>
+    <canvas id="pongCanvas" class="w-full h-full block border mx-auto filter drop-shadow-[0_0_6px_#ff2d95]" width="800" height="400"></canvas>
   </div>
 
   <!-- Local 1-vs-1 Pong -->
   <div id="localGamePage" class="route-view hidden h-[50vh] max-w-full aspect-[2/1] mx-auto flex flex-col items-center justify-start">
-    <h1 id="local-welcome-message" class="mt-4 text-pink-400 text-2xl" style="font-family:'Press Start 2P',sans-serif">
+    <h1 id="local-welcome-message" class="mt-4 text-pink-400 text-2xl font-['Press_Start_2P',sans-serif]">
       TRANSCENDENCE&nbsp;PONG
     </h1>
-    <div id="localScoreDisplay" class="mt-4 text-3xl text-pink-200" style="font-family:'Press Start 2P',sans-serif">
+    <div id="localScoreDisplay" class="mt-4 text-3xl text-pink-200 font-['Press_Start_2P',sans-serif]">
       0&nbsp;-&nbsp;0
     </div>
-    <canvas id="localPongCanvas" class="pong-canvas mt-6 rounded-md shadow-lg ring-2 ring-pink-500" width="800" height="400"></canvas>
+    <canvas id="localPongCanvas" class="pong-canvas mt-6 rounded-md shadow-lg ring-2 ring-pink-500 block mx-auto filter drop-shadow-[0_0_6px_#ff2d95]" width="800" height="400"></canvas>
     <div id="localControls" class="text-center mt-4 space-x-4">
       <button id="localBtnPlay" class="px-5 py-2 rounded bg-emerald-500 hover:bg-emerald-600 text-white font-semibold disabled:opacity-40">Play</button>
       <button id="localBtnPause" class="px-5 py-2 rounded bg-amber-400 hover:bg-amber-500 text-white font-semibold disabled:opacity-40" disabled>Pause</button>
       <button id="localBtnReset" class="px-5 py-2 rounded bg-rose-500 hover:bg-rose-600 text-white font-semibold disabled:opacity-40" disabled>Reset</button>
-      <div id="localCountdown" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[96px] font-bold text-pink-400" style="font-family:'Press Start 2P',sans-serif">3</div>
+      <div id="localCountdown" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[96px] font-bold text-pink-400 font-['Press_Start_2P',sans-serif] filter drop-shadow-[0_0_6px_#ff2d95]">3</div>
       <audio id="sndWall" src="assets/wall.wav" preload="auto"></audio>
       <audio id="sndPaddle" src="assets/paddle.wav" preload="auto"></audio>
       <audio id="sndScore" src="assets/score.wav" preload="auto"></audio>
@@ -215,29 +214,29 @@
 
   <!-- Profile Modal Template -->
   <template id="profile-tpl">
-    <div class="profile-overlay fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-      <div class="profile-modal w-[460px] p-6 rounded-lg bg-[#131325] ring-2 ring-pink-500 shadow-xl text-pink-100" style="font-family:'Rubik',sans-serif">
-        <button class="close-btn">&times;</button>
-        <img id="pr-avatar" class="profile-avatar" src="/assets/default-avatar.png" alt="Avatar">
+    <div class="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+      <div class="w-[460px] p-6 rounded-lg bg-[#131325] ring-2 ring-pink-500 shadow-xl text-pink-100 font-['Rubik',sans-serif] relative">
+        <button class="absolute top-2 right-4 bg-none border-none text-2xl leading-none">&times;</button>
+        <img id="pr-avatar" class="w-20 h-20 rounded-full object-cover mb-4" src="/assets/default-avatar.png" alt="Avatar">
         <h2 id="pr-username">@user</h2>
         <p><strong>Alias:</strong> <span id="pr-alias"></span></p>
         <p class="private"><strong>Name:</strong> <span id="pr-full"></span></p>
         <p class="private"><strong>Email:</strong> <span id="pr-email"></span></p>
         <p class="private"><strong>Created:</strong> <span id="pr-created"></span></p>
         <p><strong>Online:</strong> <span id="pr-online"></span></p>
-        <p class="private" id="pr-2fa-row" style="display:none">
+        <p class="private hidden" id="pr-2fa-row">
           <label><input type="checkbox" id="pr-2fa"> Two Factor Authentication</label>
         </p>
         <footer>
-          <button id="pr-edit" class="btn hidden">Edit</button>
-          <button id="pr-save" class="btn hidden">Save</button>
-          <button id="pr-cancel" class="btn hidden">Cancel</button>
-          <button id="pr-friends" class="btn">Friends</button>
-          <button id="pr-history" class="btn">Match History</button>
-          <button id="pr-friend-action" class="btn"></button>
-          <button id="pr-block-action" class="btn"></button>
+          <button id="pr-edit" class="inline-block px-3 py-1 rounded-md bg-emerald-500 text-white font-semibold hover:bg-emerald-600 hidden">Edit</button>
+          <button id="pr-save" class="inline-block px-3 py-1 rounded-md bg-emerald-500 text-white font-semibold hover:bg-emerald-600 hidden">Save</button>
+          <button id="pr-cancel" class="inline-block px-3 py-1 rounded-md bg-emerald-500 text-white font-semibold hover:bg-emerald-600 hidden">Cancel</button>
+          <button id="pr-friends" class="inline-block px-3 py-1 rounded-md bg-emerald-500 text-white font-semibold hover:bg-emerald-600">Friends</button>
+          <button id="pr-history" class="inline-block px-3 py-1 rounded-md bg-emerald-500 text-white font-semibold hover:bg-emerald-600">Match History</button>
+          <button id="pr-friend-action" class="inline-block px-3 py-1 rounded-md bg-emerald-500 text-white font-semibold hover:bg-emerald-600"></button>
+          <button id="pr-block-action" class="inline-block px-3 py-1 rounded-md bg-emerald-500 text-white font-semibold hover:bg-emerald-600"></button>
         </footer>
-        <div id="pr-extra" style="margin-top:1rem; max-height:240px; overflow:auto"></div>
+        <div id="pr-extra" class="mt-4 max-h-[240px] overflow-auto"></div>
       </div>
     </div>
   </template>
