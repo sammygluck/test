@@ -68,11 +68,12 @@ function wireEdit(ov, data) {
     cancel.classList.remove("hidden");
 
     //hide profile info, show inputs
-    ["alias","full","email"].forEach(k => {
+    ["alias","full"].forEach(k => {
       const span = ov.querySelector(`#pr-${k}`);
       const val  = span.textContent;
       span.innerHTML = `<input id="pr-${k}-in" value="${val}" class="w-full text-blue-950"/>`;
     });
+    ov.querySelector("#pr-email")?.classList.add("opacity-50");
     ov.querySelector("#pr-avatar")
       .insertAdjacentHTML("afterend",
         `<input id="pr-avatar-in" type="file" accept="image/*" class="block my-2 text-blue-950" />`
@@ -87,8 +88,7 @@ function wireEdit(ov, data) {
   save.onclick = async () => {
     const body = {
       alias:     ov.querySelector("#pr-alias-in") .value.trim(),
-      full_name: ov.querySelector("#pr-full-in")  .value.trim(),
-      email:     ov.querySelector("#pr-email-in") .value.trim()
+      full_name: ov.querySelector("#pr-full-in")  .value.trim()
     };
     const token = localStorage.getItem("token");
     const up   = await fetch("/profile", {
