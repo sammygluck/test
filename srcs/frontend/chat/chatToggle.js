@@ -15,13 +15,23 @@ function hideChat() {
     chat.classList.remove('md:translate-y-0');
     toggleBtn.classList.remove('hidden');
 }
+function toggleChat() {
+    if (!chat)
+        return;
+    if (chat.classList.contains('translate-y-full')) {
+        showChat();
+    }
+    else {
+        hideChat();
+    }
+}
 if (window.innerWidth < 768) {
     hideChat();
 }
 else {
     showChat();
 }
-hideBtn?.addEventListener('click', hideChat);
+hideBtn?.addEventListener('click', toggleChat);
 toggleBtn?.addEventListener('click', showChat);
 window.addEventListener('resize', () => {
     if (window.innerWidth < 768 && chat && !chat.classList.contains('translate-y-full')) {

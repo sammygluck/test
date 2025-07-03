@@ -16,13 +16,22 @@ function hideChat(): void {
   toggleBtn.classList.remove('hidden');
 }
 
+function toggleChat(): void {
+  if (!chat) return;
+  if (chat.classList.contains('translate-y-full')) {
+    showChat();
+  } else {
+    hideChat();
+  }
+}
+
 if (window.innerWidth < 768) {
   hideChat();
 } else {
   showChat();
 }
 
-hideBtn?.addEventListener('click', hideChat);
+hideBtn?.addEventListener('click', toggleChat);
 toggleBtn?.addEventListener('click', showChat);
 
 window.addEventListener('resize', () => {
