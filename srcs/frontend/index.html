@@ -260,34 +260,8 @@
   <script type="module" src="/chat/app.js"></script>
 
 
- <!-- chat show / hide -->
-<script>
-  const chat   = document.getElementById('chat-block');
-  const hide   = document.getElementById('chat-hide');
-  const toggle = document.getElementById('chat-toggle');
-
-  function showChat() {
-    chat.classList.remove('translate-y-full');
-    chat.classList.add   ('md:translate-y-0');
-    toggle.classList.add('hidden');
-  }
-  function hideChat() {
-    chat.classList.add   ('translate-y-full');
-    chat.classList.remove('md:translate-y-0');
-    toggle.classList.remove('hidden');
-  }
-
-  if (window.innerWidth < 768) hideChat(); else showChat();
-
-  hide  .addEventListener('click', hideChat);
-  toggle.addEventListener('click', showChat);
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth < 768 && !chat.classList.contains('translate-y-full')) {
-      hideChat();
-    }
-  });
-</script>
+  <!-- chat show / hide -->
+  <script type="module" src="/chat/chatToggle.js"></script>
 
 </body>
 </html>
