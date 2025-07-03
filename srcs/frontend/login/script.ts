@@ -80,11 +80,12 @@ async function authenticate(): Promise<void> {
 
 		const data: AuthResponse = await response.json();
 
-		if (response.ok) {
-			messageElem.style.color = "green";
-			messageElem.textContent = isLogin
-				? "Login successful!"
-				: "Signup successful!";
+        if (response.ok) {
+                        messageElem.classList.remove("text-red-500");
+                        messageElem.classList.add("text-green-500");
+                        messageElem.textContent = isLogin
+                                ? "Login successful!"
+                                : "Signup successful!";
 			if (isLogin && data.token) {
 				localStorage.setItem("userInfo", JSON.stringify(data));
 				localStorage.setItem("token", data.token);
@@ -103,15 +104,17 @@ async function authenticate(): Promise<void> {
 			} else if (isLogin) {
 				messageElem.textContent = "Login successful, but no token received.";
 			}
-		} else {
-			messageElem.style.color = "red";
-			messageElem.textContent =
-				data.message || (isLogin ? "Login failed!" : "Signup failed!");
+        } else {
+                        messageElem.classList.remove("text-green-500");
+                        messageElem.classList.add("text-red-500");
+                        messageElem.textContent =
+                                data.message || (isLogin ? "Login failed!" : "Signup failed!");
 		}
-	} catch (error) {
-		console.error("Authentication error:", error);
-		messageElem.style.color = "red";
-		messageElem.textContent = "An error occurred during authentication.";
+        } catch (error) {
+                        console.error("Authentication error:", error);
+                        messageElem.classList.remove("text-green-500");
+                        messageElem.classList.add("text-red-500");
+                        messageElem.textContent = "An error occurred during authentication.";
 	}
 }
 

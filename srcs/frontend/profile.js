@@ -45,7 +45,7 @@ function renderView(ov, d) {
   img.src = url;
 
   ov.querySelectorAll(".private").forEach(el => {
-    if (!el.textContent.trim()) el.style.display = "none";
+    if (!el.textContent.trim()) el.classList.add("hidden");
   });
 }
 
@@ -71,11 +71,11 @@ function wireEdit(ov, data) {
     ["alias","full","email"].forEach(k => {
       const span = ov.querySelector(`#pr-${k}`);
       const val  = span.textContent;
-      span.innerHTML = `<input id="pr-${k}-in" value="${val}" style="width:100%">`;
+      span.innerHTML = `<input id="pr-${k}-in" value="${val}" class="w-full text-blue-950"/>`;
     });
     ov.querySelector("#pr-avatar")
       .insertAdjacentHTML("afterend",
-        `<input id="pr-avatar-in" type="file" accept="image/*" style="display:block;margin:.5rem 0">`
+        `<input id="pr-avatar-in" type="file" accept="image/*" class="block my-2 text-blue-950" />`
       );
   };
 
@@ -112,7 +112,7 @@ function wireEdit(ov, data) {
 function wireTwoFactor(ov, data) {
   const row = ov.querySelector("#pr-2fa-row");
   const box = ov.querySelector("#pr-2fa");
-  row.style.display = "block";
+  row.classList.remove("hidden");
   box.checked = !!data.two_factor_auth;
   box.onchange = async () => {
     const token = localStorage.getItem("token");
@@ -154,8 +154,7 @@ friendsBtn.onclick = async () => {
   rows.forEach(u => {
     const li = document.createElement("li");
     li.innerHTML =
-      `<span class="view-profile" data-userid="${u.id}"
-              style="cursor:pointer;color:var(--link,#06c)">${u.username}</span>`;
+      `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline" data-userid="${u.id}">${u.username}</span>`;
     ul.appendChild(li);
   });
   extraBox.innerHTML = ""; extraBox.appendChild(ul);
@@ -177,7 +176,7 @@ histBtn.onclick = async () => {
   }
 
   const tbl = document.createElement("table");
-  tbl.style.width = "100%";
+  tbl.className = "w-full";
   tbl.innerHTML =
     "<thead><tr><th>Date</th><th>Result</th><th>Score</th></tr></thead>";
   const tb = document.createElement("tbody");
@@ -203,8 +202,8 @@ const token     = localStorage.getItem("token");
 
 // If it's my own profile, hide both buttons
 if (+data.id === window.__CURRENT_USER_ID) {
-  friendBtn.style.display = "none";
-  blockBtn.style.display  = "none";
+  friendBtn.classList.add("hidden");
+  blockBtn.classList.add("hidden");
   return;
 }
 
