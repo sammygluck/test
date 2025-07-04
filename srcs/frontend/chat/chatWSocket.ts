@@ -272,8 +272,29 @@ function displayDummy(username: string) {
   btn.className   = "p-1 bg-blue-900 text-amber-400 rounded absolute right-2 top-1/2 -translate-y-1/2";
   btn.onclick     = () => sendFriendRequest(username);
 
+  // open profile when clicking anywhere on the row (except the button)
+  wrap.onclick = (ev) => {
+    if (ev.target !== btn) {
+      openSearchedProfile(username);
+    }
+  };
+
   wrap.append(btn);
   friendList.append(wrap);
+}
+
+async function openSearchedProfile(username: string) {
+  try {
+    const r = await fetch(`/search/${encodeURIComponent(username)}`, {
+      headers: { Authorization: `Bearer ${userInfo.token}` }
+    });
+    if (!r.ok) throw new Error(r.statusText);
+    const [u] = await r.json();
+    if (!u) { alert("User not found."); return; }
+    openProfile(u.id);
+  } catch {
+    alert("Failed to load profile.");
+  }
 }
 
 /* ====================================================================
@@ -363,12 +384,20 @@ function loadSystemChat() {
  * ================================================================== */
 async function sendFriendRequest(username: string) {
   try {
-    const r = await fetch(`/search/${username}`, {
+    const r = await fetch(`/search/${encodeURIComponent(username)}`, {
       headers: { Authorization: `Bearer ${userInfo.token}` }
     });
     if (!r.ok) throw new Error(r.statusText);
     const [u] = await r.json();
-    addFriend(u.id);
+    if (!u) { alert("User not found."); return; }
+    await addFriend(u.id);
+    // refresh list immediately
+    currentUserData = await fetchUserData(userInfo.id);
+    currentUserData.friendlist.unshift({
+      id: -1, username: "System", online: false,
+      new_message: false, chat_history: []
+    } as Friend);
+    displayFriendsList();
   } catch { alert("Failed to send friend request."); }
 }
 
