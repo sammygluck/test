@@ -204,22 +204,25 @@ class Game {
 		});
 	}
 
-	render(): void {
-		this.ctx.fillStyle = "black";
-		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        render(): void {
+                /* background + centre net */
+                this.ctx.fillStyle = "black";
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-		this.paddleLeft.draw(this.ctx, this.canvas.height);
-		this.paddleRight.draw(this.ctx, this.canvas.height);
-		this.ball.draw(this.ctx, this.canvas.height);
+                this.ctx.strokeStyle = "#ff2d95";
+                this.ctx.setLineDash([10, 10]);
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.canvas.width / 2, 0);
+                this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
 
-		this.ctx.fillStyle = "white";
-		this.ctx.font = "20px Arial";
-		this.ctx.fillText(
-			`${this.scoreLeft} - ${this.scoreRight}`,
-			this.canvas.width / 2 - 20,
-			30
-		);
-	}
+                /* objects */
+                this.paddleLeft.draw(this.ctx, this.canvas.height);
+                this.paddleRight.draw(this.ctx, this.canvas.height);
+                this.ball.draw(this.ctx, this.canvas.height);
+        }
 }
 
 const canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
