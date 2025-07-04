@@ -202,8 +202,12 @@ class Game {
         this.ball.draw(this.ctx, this.canvas.height);
         scoreEl.textContent = `${this.scoreLeft} - ${this.scoreRight}`;
         const leftLeading = this.scoreLeft > this.scoreRight;
-        scoreEl.style.color = leftLeading ? '#ff2d95' : '#00bfff';
-        scoreEl.style.textShadow = leftLeading ? '0 0 6px #ff2d95' : '0 0 6px #00bfff';
+        scoreEl.classList.remove('text-\[\#ff2d95\]', 'text-\[\#00bfff\]', 'drop-shadow-\[0_0_6px_\#ff2d95\]', 'drop-shadow-\[0_0_6px_\#00bfff\]');
+        if (leftLeading) {
+            scoreEl.classList.add('text-\[\#ff2d95\]', 'drop-shadow-[0_0_6px_#ff2d95]');
+        } else {
+            scoreEl.classList.add('text-\[\#00bfff\]', 'drop-shadow-[0_0_6px_#00bfff]');
+        }
     }
     showCountdown(callback) {
         countdownEl.classList.remove('hidden');

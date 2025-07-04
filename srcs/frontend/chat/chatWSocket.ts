@@ -136,9 +136,9 @@ async function initializeChat(): Promise<void> {
     new_message: false, chat_history: []
   } as Friend);
 
-  friendChat.style.display = "none";
-  backButton.style.display = "none";
-  friendsPane.style.display = "block";
+  friendChat.classList.add("hidden");
+  backButton.classList.add("hidden");
+  friendsPane.classList.remove("hidden");
 
   updateCurrentUserData();
   updateChatHeader();
@@ -148,7 +148,7 @@ async function initializeChat(): Promise<void> {
 /* ====================================================================
  *  Global click → close context-menu
  * ================================================================== */
-document.onclick = () => { contextMenu.style.display = "none"; };
+document.onclick = () => { contextMenu.classList.add("hidden"); };
 
 /* ====================================================================
  *  Send buttons / keypress
@@ -174,9 +174,9 @@ function sendPrivate() {
  *  Navigation: back to friends
  * ================================================================== */
 backButton.onclick = () => {
-  friendChat.style.display = "none";
-  backButton.style.display = "none";
-  friendsPane.style.display = "block";
+  friendChat.classList.add("hidden");
+  backButton.classList.add("hidden");
+  friendsPane.classList.remove("hidden");
 
   selectedFriend = 0;
   updateChatHeader();
@@ -281,7 +281,7 @@ function displayDummy(username: string) {
  * ================================================================== */
 function rclickMenu(e: MouseEvent, userId: number) {
   e.preventDefault();
-  contextMenu.style.display = "block";
+  contextMenu.classList.remove("hidden");
   contextMenu.style.left = `${e.offsetX}px`;
   contextMenu.style.top  = `${e.offsetY + 150}px`;
 
@@ -306,20 +306,20 @@ function rclickMenu(e: MouseEvent, userId: number) {
  *  Open a DM or System chat
  * ================================================================== */
 function openChat(friendId: number) {
-  friendsPane.style.display = "none";
-  backButton.style.display  = "block";
-  friendChat.style.display  = "flex";
+  friendsPane.classList.add("hidden");
+  backButton.classList.remove("hidden");
+  friendChat.classList.remove("hidden");
 
   selectedFriend = friendId;
   updateChatHeader(friendId);
 
   if (friendId === -1) {          // system
-    messageIn.style.display = "none";
-    sendButton.style.display = "none";
+    messageIn.classList.add("hidden");
+    sendButton.classList.add("hidden");
     loadSystemChat();
   } else {
-    messageIn.style.display = "block";
-    sendButton.style.display = "block";
+    messageIn.classList.remove("hidden");
+    sendButton.classList.remove("hidden");
     loadChatHistory(friendId);
   }
 }

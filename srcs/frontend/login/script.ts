@@ -1,9 +1,10 @@
 import { handleRouteChange } from "../router.js";
 import {
-	connectGameServer,
-	disconnectGameServer,
+        connectGameServer,
+        disconnectGameServer,
 } from "../tournament/script.js";
 import { connectChat, disconnectChat } from "../chat/chatWSocket.js";
+import { initNavProfile } from "../chat/app.js";
 
 let isLogin: boolean = true;
 
@@ -80,17 +81,19 @@ async function authenticate(): Promise<void> {
 
 		const data: AuthResponse = await response.json();
 
-		if (response.ok) {
-			messageElem.style.color = "green";
-			messageElem.textContent = isLogin
-				? "Login successful!"
-				: "Signup successful!";
+        if (response.ok) {
+                        messageElem.classList.remove("text-red-500");
+                        messageElem.classList.add("text-green-500");
+                        messageElem.textContent = isLogin
+                                ? "Login successful!"
+                                : "Signup successful!";
 			if (isLogin && data.token) {
 				localStorage.setItem("userInfo", JSON.stringify(data));
 				localStorage.setItem("token", data.token);
 				handleRouteChange(); // Update the view after successful auth
-				connectGameServer(); // Connect to the game server after login
-				connectChat(); // Connect to the chat server after login
+                        connectGameServer(); // Connect to the game server after login
+                        connectChat(); // Connect to the chat server after login
+                        initNavProfile();
 			} else if (
 				isLogin &&
 				data.message &&
@@ -103,15 +106,17 @@ async function authenticate(): Promise<void> {
 			} else if (isLogin) {
 				messageElem.textContent = "Login successful, but no token received.";
 			}
-		} else {
-			messageElem.style.color = "red";
-			messageElem.textContent =
-				data.message || (isLogin ? "Login failed!" : "Signup failed!");
+        } else {
+                        messageElem.classList.remove("text-green-500");
+                        messageElem.classList.add("text-red-500");
+                        messageElem.textContent =
+                                data.message || (isLogin ? "Login failed!" : "Signup failed!");
 		}
-	} catch (error) {
-		console.error("Authentication error:", error);
-		messageElem.style.color = "red";
-		messageElem.textContent = "An error occurred during authentication.";
+        } catch (error) {
+                        console.error("Authentication error:", error);
+                        messageElem.classList.remove("text-green-500");
+                        messageElem.classList.add("text-red-500");
+                        messageElem.textContent = "An error occurred during authentication.";
 	}
 }
 
@@ -161,9 +166,10 @@ async function twoFactorAuthenticate(): Promise<void> {
 			localStorage.removeItem("twoFactorToken"); // Clear the two-factor token after successful verification
 			document.getElementById("twoFactorPage")?.classList.add("hidden");
 			handleRouteChange(); // Update the view after successful auth
-			connectGameServer(); // Connect to the game server after login
-			connectChat(); // Connect to the chat server after login
-		} else {
+                        connectGameServer(); // Connect to the game server after login
+                        connectChat(); // Connect to the chat server after login
+                        initNavProfile();
+                } else {
 			messageDisplay.textContent = data.error || "Verification failed.";
 		}
 	} catch (error) {
