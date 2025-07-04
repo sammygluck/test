@@ -43,7 +43,9 @@ function renderView(ov, d) {
   ov.querySelector("#pr-full").textContent = fullVal;
   ov.querySelector("#pr-email")  .textContent = d.email        || "";
   ov.querySelector("#pr-created").textContent = d.created_at  || "";
-  ov.querySelector("#pr-online") .textContent = d.online       ? "Yes" : "No";
+  const online = ov.querySelector("#pr-online");
+  online.classList.remove("bg-red-500", "bg-green-500");
+  online.classList.add(d.online ? "bg-green-500" : "bg-red-500");
 
   const img = ov.querySelector("#pr-avatar");
   const url = d.avatar
@@ -80,7 +82,9 @@ function wireEdit(ov, data) {
       const val  = span.textContent;
       span.innerHTML = `<input id="pr-${k}-in" value="${val}" class="w-full text-blue-950"/>`;
     });
-    ov.querySelector("#pr-email")?.classList.add("opacity-50");
+    ["#pr-email", "#pr-created", "#pr-online"].forEach(sel => {
+      ov.querySelector(sel)?.classList.add("opacity-50");
+    });
     ov.querySelector("#pr-avatar")
       .insertAdjacentHTML("afterend",
         `<input id="pr-avatar-in" type="file" accept="image/*" class="block my-2 text-blue-950" />`
