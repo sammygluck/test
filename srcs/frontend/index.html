@@ -124,14 +124,14 @@
         <img id="player1Avatar" src="/default-avatar.svg" alt="Player 1 Avatar" class="w-10 h-10 rounded-full object-cover"/>
         <span id="player1Name" class="text-lg font-medium">Player1</span>
       </div>
-      <div id="scoreDisplay" class="text-2xl font-bold filter">0 - 0</div>
-      <div id="countDownDisplay" class="text-2xl font-bold hidden filter drop-shadow-[0_0_6px_#ff2d95]">5</div>
+      <div id="scoreDisplay" class="text-3xl text-pink-200 font-['Press_Start_2P',sans-serif]">0 - 0</div>
+      <div id="countDownDisplay" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[96px] font-bold text-pink-400 font-['Press_Start_2P',sans-serif] filter drop-shadow-[0_0_6px_#ff2d95]">5</div>
       <div class="flex items-center gap-3">
         <span id="player2Name" class="text-lg font-medium">Player2</span>
         <img id="player2Avatar" src="/default-avatar.svg" alt="Player 2 Avatar" class="w-10 h-10 rounded-full object-cover"/>
       </div>
     </div>
-    <canvas id="pongCanvas" class="w-full h-full block border mx-auto filter drop-shadow-[0_0_6px_#ff2d95]" width="800" height="400"></canvas>
+    <canvas id="pongCanvas" class="w-full h-full block mx-auto rounded-md shadow-lg ring-2 ring-pink-500 filter drop-shadow-[0_0_6px_#ff2d95]" width="800" height="400"></canvas>
   </div>
 
   <!-- Local 1-vs-1 Pong -->
