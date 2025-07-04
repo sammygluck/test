@@ -239,7 +239,8 @@ async function openSearchedProfile(username) {
         });
         if (!r.ok)
             throw new Error(r.statusText);
-        const [u] = await r.json();
+        const data = await r.json();
+        const u = Array.isArray(data) ? data[0] : null;
         if (!u) {
             alert("User not found.");
             return;
@@ -323,7 +324,8 @@ async function sendFriendRequest(username) {
         });
         if (!r.ok)
             throw new Error(r.statusText);
-        const [u] = await r.json();
+        const data = await r.json();
+        const u = Array.isArray(data) ? data[0] : null;
         if (!u) {
             alert("User not found.");
             return;

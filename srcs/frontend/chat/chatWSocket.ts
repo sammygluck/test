@@ -289,7 +289,8 @@ async function openSearchedProfile(username: string) {
       headers: { Authorization: `Bearer ${userInfo.token}` }
     });
     if (!r.ok) throw new Error(r.statusText);
-    const [u] = await r.json();
+    const data = await r.json();
+    const u = Array.isArray(data) ? data[0] : null;
     if (!u) { alert("User not found."); return; }
     openProfile(u.id);
   } catch {
@@ -388,7 +389,8 @@ async function sendFriendRequest(username: string) {
       headers: { Authorization: `Bearer ${userInfo.token}` }
     });
     if (!r.ok) throw new Error(r.statusText);
-    const [u] = await r.json();
+    const data = await r.json();
+    const u = Array.isArray(data) ? data[0] : null;
     if (!u) { alert("User not found."); return; }
     await addFriend(u.id);
     // refresh list immediately
