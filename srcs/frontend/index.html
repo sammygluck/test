@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet"/>
 
 </head>
-<body class="bg-gradient-to-br from-[#0d032a] via-[#101040] to-[#120920] text-gray-200">
+<body class="bg-gradient-to-br from-blue-100 via-white to-blue-100 text-gray-900">
 
   <!-- Navbar (on top) -->
   <nav id="navbar" class="bg-gray-800 text-white px-4 py-3 shadow-md z-50 relative hidden">
@@ -118,8 +118,11 @@
   </div>
 
   <!-- Live / Remote Pong Game -->
-  <div id="gamePage" class="route-view hidden h-[50vh] max-w-full aspect-[2/1] mx-auto">
-    <div class="flex items-center justify-between px-6 py-4">
+  <div id="gamePage" class="route-view hidden h-[50vh] max-w-full aspect-[2/1] mx-auto flex flex-col items-center">
+    <h1 id="tournament-welcome-message" class="mt-4 text-pink-400 text-2xl font-['Press_Start_2P',sans-serif]">
+      PONG&nbsp;TOURNAMENT
+    </h1>
+    <div class="flex items-center justify-between px-6 py-4 w-full">
       <div class="flex items-center gap-3">
         <img id="player1Avatar" src="/default-avatar.svg" alt="Player 1 Avatar" class="w-10 h-10 rounded-full object-cover"/>
         <span id="player1Name" class="text-lg font-medium">Player1</span>
