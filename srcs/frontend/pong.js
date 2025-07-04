@@ -205,7 +205,8 @@ class Game {
         scoreEl.classList.remove('text-\[\#ff2d95\]', 'text-\[\#00bfff\]', 'drop-shadow-\[0_0_6px_\#ff2d95\]', 'drop-shadow-\[0_0_6px_\#00bfff\]');
         if (leftLeading) {
             scoreEl.classList.add('text-\[\#ff2d95\]', 'drop-shadow-[0_0_6px_#ff2d95]');
-        } else {
+        }
+        else {
             scoreEl.classList.add('text-\[\#00bfff\]', 'drop-shadow-[0_0_6px_#00bfff]');
         }
     }
