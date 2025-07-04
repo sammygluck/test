@@ -9,11 +9,18 @@ export async function openProfile(userId) {
   closeBtn.onclick = () => overlay.remove();
 
   const token = localStorage.getItem("token");
-  const res   = await fetch(`/user/${userId}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const data  = await res.json();
-  if (!res.ok) { alert(data.error || "Cannot load profile"); return; }
+  let data;
+  try {
+    const res = await fetch(`/user/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Cannot load profile");
+  } catch (err) {
+    alert(err.message || err);
+    overlay.remove();
+    return;
+  }
 
   renderView(overlay, data);
   wireExtraButtons(overlay, data);
@@ -200,6 +207,9 @@ const friendBtn = ov.querySelector("#pr-friend-action");
 const blockBtn  = ov.querySelector("#pr-block-action");
 const token     = localStorage.getItem("token");
 
+friendBtn.classList.add("hidden");
+blockBtn.classList.add("hidden");
+
 // If it's my own profile, hide both buttons
 if (+data.id === window.__CURRENT_USER_ID) {
   friendBtn.classList.add("hidden");
@@ -230,6 +240,8 @@ if (+data.id === window.__CURRENT_USER_ID) {
 
   updateFriendLabel();
   updateBlockLabel();
+  friendBtn.classList.remove("hidden");
+  blockBtn.classList.remove("hidden");
 
   // Add / Remove Friend
   friendBtn.onclick = async () => {
