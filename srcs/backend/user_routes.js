@@ -584,10 +584,10 @@ fastify.get("/friends/:id",
 	  if (!u || !u.friends) return [];
 	  const ids = JSON.parse(u.friends);
 	  if (!ids.length) return [];
-	  const placeholders = ids.map(() => "?").join(",");
-	  const rows = await fastify.sqlite.all(
-		`SELECT id, username FROM users WHERE id IN (${placeholders})`, ids
-	  );
+          const placeholders = ids.map(() => "?").join(",");
+          const query =
+            "SELECT id, username FROM users WHERE id IN (" + placeholders + ")";
+          const rows = await fastify.sqlite.all(query, ids);
 	  return rows;
 	}
   );
