@@ -1,4 +1,4 @@
-import { User, Friend, fetchUserData, addFriend } from "./userdata.js";
+import { type User, type Friend, fetchUserData, addFriend } from "./userdata.js";
 import { openProfile }                     from "../profile.js";
 
 /* ---------- DOM ----------------------------------------------------- */
@@ -33,7 +33,7 @@ let ws: WebSocket | null          = null;
 let currentUserData: User;            // full DB object for me
 let selectedFriend: number = 0;       // 0 = friend-list, -1 = “System”
 let userInfo: UserInfo | null  = null;
-let setIntervalId: NodeJS.Timeout | null = null;
+let setIntervalId: number | null = null;
 
 /* ====================================================================
  *  Connection bootstrap
