@@ -3,11 +3,15 @@
  *  ------------------------------------------------------------------------*/
 
 declare global {
-    interface Window {
-      /** Set by `initNavProfile()` so other modules can reference the logged‑in user */
-      __CURRENT_USER_ID: number | null;
-    }
+  interface Window {
+    /** Set by `initNavProfile()` so other modules can reference the logged‑in user */
+    __CURRENT_USER_ID: number | null;
   }
+}
+
+let __CURRENT_USER_ID: number | null = null;
+window.__CURRENT_USER_ID = null;
+let _navProfileInitDone = false;
   
   export interface UserProfileData {
     id: number;
@@ -364,4 +368,76 @@ declare global {
       };
     })();
   }
-  
+/** -----------------------------------------------------------------------
+ *  NAVBAR PROFILE INITIALISATION (migrated from chat/app.js)
+ *  --------------------------------------------------------------------*/
+
+export function initNavProfile(): void {
+  let userInfoGlobal: any;
+
+  const buf = localStorage.getItem("userInfo");
+  if (!buf) {
+    document.getElementById("chat-block")?.classList.add("hidden");
+    if (window.location.pathname !== "/login") {
+      window.location.href = "/login";
+    }
+    return;
+  }
+  userInfoGlobal = JSON.parse(buf);
+
+  const avatarEl = document.getElementById("navAvatar");
+  if (avatarEl) {
+    avatarEl.dataset.userid = String(userInfoGlobal.id);
+    avatarEl.classList.add("view-profile", "cursor-pointer");
+  }
+
+  (async () => {
+    const userInfo = userInfoGlobal;
+    localStorage.setItem("token", userInfo.token);
+
+    const me = await fetch("/currentuser", {
+      headers: { Authorization: `Bearer ${userInfo.token}` }
+    }).then(r => r.json()).catch(() => null);
+    if (!me) { window.location.href = "/login"; return; }
+    __CURRENT_USER_ID = window.__CURRENT_USER_ID = me.id;
+    const avatar = document.getElementById("navAvatar");
+    if (avatar) avatar.dataset.userid = String(me.id);
+    const nameEl = document.getElementById("navUsername");
+    if (nameEl) {
+      nameEl.dataset.userid = String(me.id);
+      nameEl.classList.add("view-profile", "cursor-pointer");
+    }
+  })();
+
+  if (!_navProfileInitDone) {
+    document.body.addEventListener("click", e => {
+      const t = (e.target as HTMLElement).closest(".view-profile");
+      if (!t) return;
+
+      const raw = (t as HTMLElement).dataset.userid;
+      const userId = parseInt(raw ?? "", 10);
+      if (Number.isNaN(userId)) {
+        console.warn("view-profile clicked but data-userid is invalid:", raw);
+        return;
+      }
+
+      openProfile(userId);
+    });
+
+    document.getElementById("view-my-profile")?.addEventListener("click", () => {
+      if (window.__CURRENT_USER_ID)
+        openProfile(window.__CURRENT_USER_ID);
+    });
+
+    _navProfileInitDone = true;
+  }
+
+  const nameEl = document.getElementById("navUsername");
+  if (nameEl) {
+    nameEl.dataset.userid = String(userInfoGlobal.id);
+    nameEl.classList.add("view-profile", "cursor-pointer");
+  }
+}
+
+initNavProfile();
+ 

@@ -1,7 +1,7 @@
 import { handleRouteChange } from "../router.js";
 import { connectGameServer, disconnectGameServer, } from "../tournament/script.js";
 import { connectChat, disconnectChat } from "../chat/chatWSocket.js";
-import { initNavProfile } from "../chat/app.js";
+import { initNavProfile } from "../profile.js";
 let isLogin = true;
 function toggleForm() {
     isLogin = !isLogin;
@@ -175,5 +175,4 @@ document.getElementById("auth-2fa-button")?.addEventListener("click", () => {
 document.getElementById("auth-2fa-back")?.addEventListener("click", () => {
     document.getElementById("loginPage")?.classList.remove("hidden");
     document.getElementById("twoFactorPage")?.classList.add("hidden");
-});
-export { logout };
+});export { logout };

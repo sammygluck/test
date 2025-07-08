@@ -1,3 +1,6 @@
+let __CURRENT_USER_ID = null;
+window.__CURRENT_USER_ID = null;
+let _navProfileInitDone = false;
 export async function openProfile(userId) {
     const tpl = document.getElementById("profile-tpl");
     if (!tpl)
@@ -256,3 +259,65 @@ function wireFriendBlock(ov, data) {
         };
     })();
 }
+export function initNavProfile() {
+    let userInfoGlobal;
+    const buf = localStorage.getItem("userInfo");
+    if (!buf) {
+        document.getElementById("chat-block")?.classList.add("hidden");
+        if (window.location.pathname !== "/login") {
+            window.location.href = "/login";
+        }
+        return;
+    }
+    userInfoGlobal = JSON.parse(buf);
+    const avatarEl = document.getElementById("navAvatar");
+    if (avatarEl) {
+        avatarEl.dataset.userid = String(userInfoGlobal.id);
+        avatarEl.classList.add("view-profile", "cursor-pointer");
+    }
+    (async () => {
+        const userInfo = userInfoGlobal;
+        localStorage.setItem("token", userInfo.token);
+        const me = await fetch("/currentuser", {
+            headers: { Authorization: `Bearer ${userInfo.token}` }
+        }).then(r => r.json()).catch(() => null);
+        if (!me) {
+            window.location.href = "/login";
+            return;
+        }
+        __CURRENT_USER_ID = window.__CURRENT_USER_ID = me.id;
+        const avatar = document.getElementById("navAvatar");
+        if (avatar)
+            avatar.dataset.userid = String(me.id);
+        const nameEl = document.getElementById("navUsername");
+        if (nameEl) {
+            nameEl.dataset.userid = String(me.id);
+            nameEl.classList.add("view-profile", "cursor-pointer");
+        }
+    })();
+    if (!_navProfileInitDone) {
+        document.body.addEventListener("click", e => {
+            const t = e.target.closest(".view-profile");
+            if (!t)
+                return;
+            const raw = t.dataset.userid;
+            const userId = parseInt(raw ?? "", 10);
+            if (Number.isNaN(userId)) {
+                console.warn("view-profile clicked but data-userid is invalid:", raw);
+                return;
+            }
+            openProfile(userId);
+        });
+        document.getElementById("view-my-profile")?.addEventListener("click", () => {
+            if (window.__CURRENT_USER_ID)
+                openProfile(window.__CURRENT_USER_ID);
+        });
+        _navProfileInitDone = true;
+    }
+    const nameEl = document.getElementById("navUsername");
+    if (nameEl) {
+        nameEl.dataset.userid = String(userInfoGlobal.id);
+        nameEl.classList.add("view-profile", "cursor-pointer");
+    }
+}
+initNavProfile();
