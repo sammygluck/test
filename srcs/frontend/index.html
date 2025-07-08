@@ -97,16 +97,16 @@
   </div>
 
   <!-- Tournament Page -->
-  <div id="tournamentPage" class="flex gap-6 route-view max-h-[50vh]">
-    <div class="w-1/4 bg-amber-50 border border-blue-950 p-4 rounded-2xl shadow flex flex-col">
+  <div id="tournamentPage" class="flex gap-6 route-view max-h-[50vh] max-w-4xl mx-auto">
+    <div class="w-1/4 bg-blue-50 border border-blue-950 p-4 rounded-2xl shadow flex flex-col">
       <h2 class="text-xl font-bold mb-4">Tournaments</h2>
       <ul id="tournamentList" class="space-y-2 overflow-auto max-h-full flex-1"></ul>
       <form id="createTournamentForm" class="mt-6">
-        <input type="text" id="tournamentName" class="w-full p-2 border border-blue-950 rounded mb-2 bg-amber-50 text-blue-950" placeholder="New Tournament" required/>
-        <button type="submit" class="w-full bg-blue-900 text-amber-400 font-bold py-2 rounded hover:brightness-90">Create</button>
+        <input type="text" id="tournamentName" class="w-full p-2 border border-blue-950 rounded mb-2 bg-blue-50 text-blue-950" placeholder="New Tournament" required/>
+        <button type="submit" class="w-full bg-blue-900 text-blue-100 font-bold py-2 rounded hover:brightness-90">Create</button>
       </form>
     </div>
-    <div class="flex-1 bg-amber-50 border border-blue-950 p-4 rounded-2xl shadow flex flex-col">
+    <div class="flex-1 bg-blue-50 border border-blue-950 p-4 rounded-2xl shadow flex flex-col">
       <h2 class="text-xl font-bold mb-4" id="selectedTournamentTitle">Select a tournament</h2>
       <p id="statusMessage" class="mb-4 text-sm text-gray-600"></p>
       <ul id="playerList" class="space-y-2 mb-4 overflow-auto max-h-full flex-1"></ul>
@@ -162,7 +162,7 @@
        class="fixed bottom-4 left-1/2 -translate-x-1/2
               w-11/12 sm:w-3/4 lg:w-2/3
               h-[30vh] max-h-[360px]
-              flex border border-blue-950 bg-amber-50
+              flex border border-blue-950 bg-blue-50
               transition-transform duration-200 transform-gpu
               translate-y-full md:translate-y-0           <!-- closed on mobile -->
               z-40">
@@ -170,7 +170,7 @@
     <!-- “–” HIDE BUTTON (always visible while panel is shown) -->
     <button id="chat-hide"
             class="absolute -top-3 right-3 w-6 h-6 flex items-center justify-center
-                   rounded-full bg-blue-900 text-amber-400 text-sm font-bold shadow">
+                   rounded-full bg-blue-900 text-blue-100 text-sm font-bold shadow">
       –
     </button>
 
@@ -178,30 +178,30 @@
       <h2 class="pb-2 font-bold text-blue-950 border-b border-blue-950">Live Chat</h2>
       <div id="live-chat-content" class="flex-1 flex flex-col-reverse overflow-y-scroll min-h-0 break-all relative"></div>
       <div class="flex flex-row gap-2 p-2 border-t border-blue-950 box-border">
-        <input id="live-message-in" type="text" placeholder="Type a message..." class="flex-1 p-2 border border-blue-950 rounded bg-amber-50 text-blue-950"/>
-        <button id="live-send-button" class="px-4 py-2 bg-blue-900 text-amber-400 font-bold rounded shrink-0 hover:brightness-90">Send</button>
+        <input id="live-message-in" type="text" placeholder="Type a message..." class="flex-1 p-2 border border-blue-950 rounded bg-blue-50 text-blue-950"/>
+        <button id="live-send-button" class="px-4 py-2 bg-blue-900 text-blue-100 font-bold rounded shrink-0 hover:brightness-90">Send</button>
       </div>
     </div>
-    <div id="friends-and-chat" class="flex flex-col flex-[1] border border-blue-950 p-2 box-border relative">
-      <div id="chat-header" class="flex flex-row bg-blue-900 text-amber-400 p-2 items-center font-bold">
+    <div id="friends-and-chat" class="flex flex-col flex-[1] border border-blue-950 p-2 box-border relative bg-blue-50">
+      <div id="chat-header" class="flex flex-row bg-blue-900 text-blue-100 p-2 items-center font-bold">
         <button id="back-button" class="left-2 hover:cursor-pointer">&lt;</button>
         <a id="user-header" class="mx-auto hover:cursor-pointer">Your Username</a>
       </div>
       <div id="friends" class="flex flex-col">
-        <input type="search" id="search-bar" placeholder="Search friends..." class="w-full my-2 p-2 border border-blue-950 rounded bg-amber-50 text-blue-950"/>
+        <input type="search" id="search-bar" placeholder="Search friends..." class="w-full my-2 p-2 border border-blue-950 rounded bg-blue-50 text-blue-950"/>
         <div id="friend-list"></div>
       </div>
       <div id="friend-chat" class="flex flex-col flex-1 overflow-y-auto min-h-0 break-all box-border relative">
         <div id="chat-content" class="flex flex-col flex-1 overflow-y-auto min-h-0 break-all box-border relative"></div>
         <div class="flex flex-row gap-2 p-2 border-t border-blue-950 box-border relative">
-          <input id="message-in" type="text" placeholder="Type a message..." class="flex flex-1 border border-blue-950 rounded bg-amber-50 text-blue-950"/>
-          <button id="send-button" class="flex px-4 py-2 bg-blue-900 text-amber-400 font-bold rounded shrink-0 hover:brightness-90">Send</button>
+          <input id="message-in" type="text" placeholder="Type a message..." class="flex flex-1 border border-blue-950 rounded bg-blue-50 text-blue-950"/>
+          <button id="send-button" class="flex px-4 py-2 bg-blue-900 text-blue-100 font-bold rounded shrink-0 hover:brightness-90">Send</button>
         </div>
       </div>
-      <div id="context-menu" class="absolute text-center bg-amber-50 border border-blue-950 rounded-md hidden">
+      <div id="context-menu" class="absolute text-center bg-blue-50 border border-blue-950 rounded-md hidden">
         <ul class="p-0 m-0 min-w-[150px] list-none">
-          <li id="view-profile" class="py-2 border border-blue-950 rounded-t-md hover:bg-amber-100 hover:text-blue-950">View Profile</li>
-          <li id="invite-user" class="py-2 border border-blue-950 rounded-b-md hover:bg-amber-100 hover:text-blue-950">Invite User</li>
+          <li id="view-profile" class="py-2 border border-blue-950 rounded-t-md hover:bg-blue-100 hover:text-blue-950">View Profile</li>
+          <li id="invite-user" class="py-2 border border-blue-950 rounded-b-md hover:bg-blue-100 hover:text-blue-950">Invite User</li>
         </ul>
       </div>
     </div>
@@ -210,7 +210,7 @@
   <!-- “Chat” SHOW BUTTON (only visible when panel is hidden) -->
   <button id="chat-toggle"
           class="fixed bottom-4 right-4 z-50
-                 px-3 py-2 rounded-full bg-blue-900 text-amber-400
+                 px-3 py-2 rounded-full bg-blue-900 text-blue-100
                  font-bold shadow-lg hidden">
     Chat
   </button>
