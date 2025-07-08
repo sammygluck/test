@@ -214,7 +214,8 @@ function renderTournamentList(): void {
 	tournaments.forEach((t) => {
 		const li = document.createElement("li");
 		li.textContent = t.name;
-		li.className = "cursor-pointer p-2 hover:bg-gray-100 rounded";
+                li.className =
+                        "cursor-pointer p-2 rounded border border-blue-950 bg-amber-50 hover:bg-amber-100 text-blue-950";
 		li.addEventListener("click", () => selectTournament(t.id));
 		tournamentList.appendChild(li);
 	});
@@ -245,7 +246,8 @@ function selectTournament(id: number): void {
 	tournament.players.forEach((player) => {
 		const li = document.createElement("li");
 		li.textContent = player.username;
-		li.className = "border p-2 rounded";
+                li.className =
+                        "border border-blue-950 p-2 rounded bg-amber-50 text-blue-950";
 		playerList.appendChild(li);
 	});
 
