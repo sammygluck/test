@@ -255,7 +255,7 @@ function loadFriendList(list: Friend[] = currentUserData.friendlist) {
   });
 }
 function rowBaseClass(bold: boolean) {
-  return "w-full cursor-pointer relative p-2 border-b border-blue-900 hover:bg-blue-100 " +
+  return "w-full cursor-pointer relative p-2 border-b border-blue-900 hover:bg-amber-100 " +
          (bold ? "font-bold " : "");
 }
 
@@ -263,13 +263,13 @@ function rowBaseClass(bold: boolean) {
 function displayDummy(username: string) {
   friendList.innerHTML = "";
   const wrap = document.createElement("div");
-  wrap.className = "w-full cursor-pointer p-2 border-b border-blue-900 hover:bg-blue-100 relative";
+  wrap.className = "w-full cursor-pointer p-2 border-b border-blue-900 hover:bg-amber-100 relative";
 
   wrap.textContent = username;
 
   const btn = document.createElement("button");
   btn.textContent = "Add Friend";
-  btn.className   = "p-1 bg-blue-900 text-blue-100 rounded absolute right-2 top-1/2 -translate-y-1/2";
+  btn.className   = "p-1 bg-blue-900 text-amber-400 rounded absolute right-2 top-1/2 -translate-y-1/2";
   btn.onclick     = () => sendFriendRequest(username);
 
   // open profile when clicking anywhere on the row (except the button)
