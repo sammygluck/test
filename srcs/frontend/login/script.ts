@@ -1,9 +1,10 @@
 import { handleRouteChange } from "../router.js";
 import {
-	connectGameServer,
-	disconnectGameServer,
+        connectGameServer,
+        disconnectGameServer,
 } from "../tournament/script.js";
 import { connectChat, disconnectChat } from "../chat/chatWSocket.js";
+import { initNavProfile } from "../profile.js";
 
 let isLogin: boolean = true;
 
@@ -90,8 +91,9 @@ async function authenticate(): Promise<void> {
 				localStorage.setItem("userInfo", JSON.stringify(data));
 				localStorage.setItem("token", data.token);
 				handleRouteChange(); // Update the view after successful auth
-				connectGameServer(); // Connect to the game server after login
-				connectChat(); // Connect to the chat server after login
+                        connectGameServer(); // Connect to the game server after login
+                        connectChat(); // Connect to the chat server after login
+                        initNavProfile();
 			} else if (
 				isLogin &&
 				data.message &&
@@ -165,8 +167,9 @@ async function twoFactorAuthenticate(): Promise<void> {
 			document.getElementById("twoFactorPage")?.classList.add("hidden");
 			handleRouteChange(); // Update the view after successful auth
 			connectGameServer(); // Connect to the game server after login
-			connectChat(); // Connect to the chat server after login
-		} else {
+                        connectChat(); // Connect to the chat server after login
+                        initNavProfile();
+                } else {
 			messageDisplay.textContent = data.error || "Verification failed.";
 		}
 	} catch (error) {
