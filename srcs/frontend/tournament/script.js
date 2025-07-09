@@ -119,7 +119,7 @@ function renderTournamentList() {
         const li = document.createElement("li");
         li.textContent = t.name;
         li.className =
-            "cursor-pointer p-2 rounded border border-blue-950 bg-blue-50 hover:bg-blue-100 text-blue-950";
+            "cursor-pointer p-2 rounded border border-pink-500 bg-[#1e1e3f] hover:bg-[#2a2a55] text-pink-100";
         li.addEventListener("click", () => openTournamentModal(t.id));
         tournamentList.appendChild(li);
     });
@@ -178,7 +178,7 @@ function selectTournament(id) {
         const li = document.createElement("li");
         li.textContent = player.username;
         li.className =
-            "border border-blue-950 p-2 rounded bg-blue-50 text-blue-950";
+            "border border-pink-500 p-2 rounded bg-[#1e1e3f] text-pink-100";
         playerList.appendChild(li);
     });
     const isCreator = userInfo && userInfo.id === tournament.creator.id;
