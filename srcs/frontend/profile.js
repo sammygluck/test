@@ -33,6 +33,11 @@ export async function openProfile(userId) {
     wireExtraButtons(overlay, data);
     wireFriendBlock(overlay, data);
     if (userId === window.__CURRENT_USER_ID) {
+        const navAvatar = document.getElementById("navAvatar");
+        if (navAvatar)
+            navAvatar.src = data.avatar
+                ? `/uploads/${data.avatar}?_=${Date.now()}`
+                : "/assets/default-avatar.png";
         const tf = wireTwoFactor(overlay, data);
         wireEdit(overlay, data, tf);
     }
@@ -175,7 +180,7 @@ function wireExtraButtons(ov, data) {
         const ul = document.createElement("ul");
         rows.forEach(u => {
             const li = document.createElement("li");
-            li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline" data-userid="${u.id}">${u.username}</span>`;
+            li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80" data-userid="${u.id}">${u.username}</span>`;
             ul.appendChild(li);
         });
         extraBox.replaceChildren(ul);
@@ -285,7 +290,7 @@ export function initNavProfile() {
     const avatarEl = document.getElementById("navAvatar");
     if (avatarEl) {
         avatarEl.dataset.userid = String(userInfoGlobal.id);
-        avatarEl.classList.add("view-profile", "cursor-pointer");
+        avatarEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
     }
     (async () => {
         const userInfo = userInfoGlobal;
@@ -299,12 +304,16 @@ export function initNavProfile() {
         }
         __CURRENT_USER_ID = window.__CURRENT_USER_ID = me.id;
         const avatar = document.getElementById("navAvatar");
-        if (avatar)
+        if (avatar) {
             avatar.dataset.userid = String(me.id);
+            avatar.src = me.avatar ? `/uploads/${me.avatar}?_=${Date.now()}` : "/assets/default-avatar.png";
+        }
         const nameEl = document.getElementById("navUsername");
         if (nameEl) {
+            const aliasVal = (me.alias ?? "").trim() || me.username;
+            nameEl.textContent = aliasVal;
             nameEl.dataset.userid = String(me.id);
-            nameEl.classList.add("view-profile", "cursor-pointer");
+            nameEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
         }
     })();
     if (!_navProfileInitDone) {
@@ -328,8 +337,10 @@ export function initNavProfile() {
     }
     const nameEl = document.getElementById("navUsername");
     if (nameEl) {
+        const aliasVal = (userInfoGlobal.alias ?? "").trim() || userInfoGlobal.username;
+        nameEl.textContent = aliasVal;
         nameEl.dataset.userid = String(userInfoGlobal.id);
-        nameEl.classList.add("view-profile", "cursor-pointer");
+        nameEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
     }
 }
 initNavProfile();

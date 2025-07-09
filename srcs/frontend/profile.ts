@@ -78,8 +78,14 @@ let _navProfileInitDone = false;
     wireExtraButtons(overlay, data);
     wireFriendBlock(overlay, data);
 
-    // Editing / 2FA only for own profile
+    // If viewing own profile, also refresh the navbar avatar
     if (userId === window.__CURRENT_USER_ID) {
+      const navAvatar = document.getElementById("navAvatar") as HTMLImageElement | null;
+      if (navAvatar)
+        navAvatar.src = data.avatar
+          ? `/uploads/${data.avatar}?_=${Date.now()}`
+          : "/assets/default-avatar.png";
+
       const tf = wireTwoFactor(overlay, data);
       wireEdit(overlay, data, tf);
     }
@@ -275,7 +281,7 @@ let _navProfileInitDone = false;
       const ul = document.createElement("ul");
       rows.forEach(u => {
         const li = document.createElement("li");
-        li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline" data-userid="${u.id}">${u.username}</span>`;
+        li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80" data-userid="${u.id}">${u.username}</span>`;
         ul.appendChild(li);
       });
       extraBox.replaceChildren(ul);
@@ -410,7 +416,7 @@ export function initNavProfile(): void {
   const avatarEl = document.getElementById("navAvatar");
   if (avatarEl) {
     avatarEl.dataset.userid = String(userInfoGlobal.id);
-    avatarEl.classList.add("view-profile", "cursor-pointer");
+    avatarEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
   }
 
   (async () => {
@@ -422,12 +428,17 @@ export function initNavProfile(): void {
     }).then(r => r.json()).catch(() => null);
     if (!me) { window.location.href = "/login"; return; }
     __CURRENT_USER_ID = window.__CURRENT_USER_ID = me.id;
-    const avatar = document.getElementById("navAvatar");
-    if (avatar) avatar.dataset.userid = String(me.id);
+    const avatar = document.getElementById("navAvatar") as HTMLImageElement | null;
+    if (avatar) {
+      avatar.dataset.userid = String(me.id);
+      avatar.src = me.avatar ? `/uploads/${me.avatar}?_=${Date.now()}` : "/assets/default-avatar.png";
+    }
     const nameEl = document.getElementById("navUsername");
     if (nameEl) {
+      const aliasVal = (me.alias ?? "").trim() || me.username;
+      nameEl.textContent = aliasVal;
       nameEl.dataset.userid = String(me.id);
-      nameEl.classList.add("view-profile", "cursor-pointer");
+      nameEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
     }
   })();
 
@@ -456,10 +467,11 @@ export function initNavProfile(): void {
 
   const nameEl = document.getElementById("navUsername");
   if (nameEl) {
+    const aliasVal = (userInfoGlobal.alias ?? "").trim() || userInfoGlobal.username;
+    nameEl.textContent = aliasVal;
     nameEl.dataset.userid = String(userInfoGlobal.id);
-    nameEl.classList.add("view-profile", "cursor-pointer");
+    nameEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
   }
 }
 
-initNavProfile();
- 
+initNavProfile(); 

@@ -1,10 +1,11 @@
 type Routes = Record<string, string>;
 
 interface userInfo {
-	id: number;
-	token: string;
-	username: string;
-	avatar: string | null;
+        id: number;
+        token: string;
+        username: string;
+        avatar: string | null;
+        alias?: string | null;
 }
 
 const routes: Routes = {
@@ -79,11 +80,11 @@ function handleRouteChange(): void {
                 path = "/login";
         } else {
                 navBar?.classList.remove("hidden");
-                document.getElementById("navUsername").textContent =
-                        user.username || "Guest";
-                document
-                        .getElementById("navAvatar")
-                        .setAttribute("src", user.avatar || "default-avatar.svg");
+                const aliasVal = (user.alias ?? "").trim() || user.username || "Guest";
+                document.getElementById("navUsername").textContent = aliasVal;
+                const navAv = document.getElementById("navAvatar");
+                if (navAv)
+                        navAv.setAttribute("src", user.avatar ? `/uploads/${user.avatar}?_=${Date.now()}` : "/assets/default-avatar.png");
                 if (path === "/login") {
                         history.replaceState({}, "", "/tournament");
                         path = "/tournament";
