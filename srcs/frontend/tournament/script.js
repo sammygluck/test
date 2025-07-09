@@ -201,6 +201,8 @@ function selectTournament(id) {
         playerList.innerHTML = "";
         subscribeBtn.classList.add("hidden");
         startBtn.classList.add("hidden");
+        unsubscribeBtn?.classList.add("hidden");
+        deleteBtn?.classList.add("hidden");
         return;
     }
     selectedTitle.textContent = `Players in "${tournament.name}"`;

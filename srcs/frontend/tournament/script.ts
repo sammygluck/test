@@ -299,15 +299,17 @@ function selectTournament(id: number): void {
                 return;
         }
 
-	const tournament = tournaments.find((t) => t.id === id) || null;
-	if (!tournament) {
-		selectedTitle.textContent = "Select a tournament";
-		statusMessage.textContent = "No tournament";
-		playerList.innerHTML = "";
-		subscribeBtn.classList.add("hidden");
-		startBtn.classList.add("hidden");
-		return;
-	}
+        const tournament = tournaments.find((t) => t.id === id) || null;
+        if (!tournament) {
+                selectedTitle.textContent = "Select a tournament";
+                statusMessage.textContent = "No tournament";
+                playerList.innerHTML = "";
+                subscribeBtn.classList.add("hidden");
+                startBtn.classList.add("hidden");
+                unsubscribeBtn?.classList.add("hidden");
+                deleteBtn?.classList.add("hidden");
+                return;
+        }
 
 	selectedTitle.textContent = `Players in "${tournament.name}"`;
 	statusMessage.textContent = tournament.started
