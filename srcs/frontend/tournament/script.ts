@@ -215,7 +215,7 @@ function renderTournamentList(): void {
 		const li = document.createElement("li");
 		li.textContent = t.name;
                 li.className =
-                        "cursor-pointer p-2 rounded border border-blue-950 bg-amber-50 hover:bg-amber-100 text-blue-950";
+                        "cursor-pointer p-2 rounded border border-blue-950 bg-blue-50 hover:bg-blue-100 text-blue-950";
 		li.addEventListener("click", () => selectTournament(t.id));
 		tournamentList.appendChild(li);
 	});
@@ -247,7 +247,7 @@ function selectTournament(id: number): void {
 		const li = document.createElement("li");
 		li.textContent = player.username;
                 li.className =
-                        "border border-blue-950 p-2 rounded bg-amber-50 text-blue-950";
+                        "border border-blue-950 p-2 rounded bg-blue-50 text-blue-950";
 		playerList.appendChild(li);
 	});
 
