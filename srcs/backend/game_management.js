@@ -124,20 +124,36 @@ async function game_management(fastify) {
 				};
 				openTournaments.push(tournament);
 				broadcast({ type: "tournaments", data: openTournaments });
-			} else if (msg.type === "subscribe") {
-				const tournament = openTournaments.find((t) => t.id === msg.tournament);
-				if (
-					tournament &&
-					!tournament.players.find((p) => p.id === socket.user.id)
-				) {
-					tournament.players.push({
-						id: socket.user.id,
-						username: socket.user.username,
-						email: socket.user.email,
-					});
-				}
-				broadcast({ type: "tournaments", data: openTournaments });
-			} else if (msg.type === "start_tournament") {
+                        } else if (msg.type === "subscribe") {
+                                const tournament = openTournaments.find((t) => t.id === msg.tournament);
+                                if (
+                                        tournament &&
+                                        !tournament.players.find((p) => p.id === socket.user.id)
+                                ) {
+                                        tournament.players.push({
+                                                id: socket.user.id,
+                                                username: socket.user.username,
+                                                email: socket.user.email,
+                                        });
+                                }
+                                broadcast({ type: "tournaments", data: openTournaments });
+                        } else if (msg.type === "unsubscribe") {
+                                const tournament = openTournaments.find((t) => t.id === msg.tournament);
+                                if (tournament) {
+                                        tournament.players = tournament.players.filter((p) => p.id !== socket.user.id);
+                                }
+                                broadcast({ type: "tournaments", data: openTournaments });
+                        } else if (msg.type === "delete_tournament") {
+                                const index = openTournaments.findIndex((t) => t.id === msg.tournament);
+                                if (
+                                        index !== -1 &&
+                                        openTournaments[index].creator.id === socket.user.id &&
+                                        !openTournaments[index].started
+                                ) {
+                                        openTournaments.splice(index, 1);
+                                }
+                                broadcast({ type: "tournaments", data: openTournaments });
+                        } else if (msg.type === "start_tournament") {
 				const tournament = openTournaments.find((t) => t.id === msg.tournament);
 				if (
 					tournament &&

@@ -23,10 +23,12 @@ interface UserInfo {
 }
 
 type ClientMessage =
-	| { type: "list_tournaments" }
-	| { type: "create_tournament"; name: string }
-	| { type: "subscribe"; tournament: number }
-	| { type: "start_tournament"; tournament: number };
+        | { type: "list_tournaments" }
+        | { type: "create_tournament"; name: string }
+        | { type: "subscribe"; tournament: number }
+        | { type: "unsubscribe"; tournament: number }
+        | { type: "delete_tournament"; tournament: number }
+        | { type: "start_tournament"; tournament: number };
 
 interface TournamentsMessage {
 	type: "tournaments";
@@ -71,7 +73,9 @@ const tournamentNameInput = document.getElementById(
 let selectedTitle: HTMLElement | null = null;
 let playerList: HTMLUListElement | null = null;
 let subscribeBtn: HTMLButtonElement | null = null;
+let unsubscribeBtn: HTMLButtonElement | null = null;
 let startBtn: HTMLButtonElement | null = null;
+let deleteBtn: HTMLButtonElement | null = null;
 let statusMessage: HTMLElement | null = null;
 let tournamentOverlay: HTMLElement | null = null;
 
@@ -193,25 +197,50 @@ function startBtnClick(): void {
 }
 
 function subscribeBtnClick(): void {
-	if (selectedTournament === null) return;
-	const msg: ClientMessage = {
-		type: "subscribe",
-		tournament: selectedTournament,
-	};
-	ws.send(JSON.stringify(msg));
+        if (selectedTournament === null) return;
+        const msg: ClientMessage = {
+                type: "subscribe",
+                tournament: selectedTournament,
+        };
+        ws.send(JSON.stringify(msg));
+}
+
+function unsubscribeBtnClick(): void {
+        if (selectedTournament === null) return;
+        const msg: ClientMessage = {
+                type: "unsubscribe",
+                tournament: selectedTournament,
+        };
+        ws.send(JSON.stringify(msg));
+}
+
+function deleteBtnClick(): void {
+        if (selectedTournament === null) return;
+        const msg: ClientMessage = {
+                type: "delete_tournament",
+                tournament: selectedTournament,
+        };
+        ws.send(JSON.stringify(msg));
 }
 
 // Render list of tournaments
 function renderTournamentList(): void {
-	tournamentList.innerHTML = "";
-	tournaments.forEach((t) => {
-		const li = document.createElement("li");
-		li.textContent = t.name;
+        tournamentList.innerHTML = "";
+        tournaments.forEach((t) => {
+                const li = document.createElement("li");
+                const subscribed =
+                        userInfo && t.players.some((p) => p.id === userInfo!.id);
+                li.innerHTML = subscribed
+                        ? `${t.name} <span class="ml-1 text-green-400">✓</span>`
+                        : t.name;
                 li.className =
-                        "cursor-pointer p-2 rounded border border-pink-500 bg-[#1e1e3f] hover:bg-[#2a2a55] text-pink-100 text-center";
+                        "cursor-pointer p-2 rounded border border-pink-500 text-center ";
+                li.className += subscribed
+                        ? "bg-green-800 text-white"
+                        : "bg-[#1e1e3f] hover:bg-[#2a2a55] text-pink-100";
                 li.addEventListener("click", () => openTournamentModal(t.id));
-		tournamentList.appendChild(li);
-	});
+                tournamentList.appendChild(li);
+        });
 }
 
 // Open the modal displaying tournament details
@@ -230,26 +259,34 @@ function openTournamentModal(id: number): void {
         statusMessage = tournamentOverlay.querySelector("#statusMessage");
         playerList = tournamentOverlay.querySelector("#playerList");
         subscribeBtn = tournamentOverlay.querySelector("#subscribeBtn");
+        unsubscribeBtn = tournamentOverlay.querySelector("#unsubscribeBtn");
         startBtn = tournamentOverlay.querySelector("#startBtn");
+        deleteBtn = tournamentOverlay.querySelector("#deleteBtn");
 
         tournamentOverlay.querySelector<HTMLButtonElement>(".close-btn")?.addEventListener("click", closeTournamentModal);
 
         subscribeBtn?.addEventListener("click", subscribeBtnClick);
+        unsubscribeBtn?.addEventListener("click", unsubscribeBtnClick);
         startBtn?.addEventListener("click", startBtnClick);
+        deleteBtn?.addEventListener("click", deleteBtnClick);
 
         selectTournament(id);
 }
 
 function closeTournamentModal(): void {
         subscribeBtn?.removeEventListener("click", subscribeBtnClick);
+        unsubscribeBtn?.removeEventListener("click", unsubscribeBtnClick);
         startBtn?.removeEventListener("click", startBtnClick);
+        deleteBtn?.removeEventListener("click", deleteBtnClick);
         tournamentOverlay?.remove();
         tournamentOverlay = null;
         selectedTitle = null;
         statusMessage = null;
         playerList = null;
         subscribeBtn = null;
+        unsubscribeBtn = null;
         startBtn = null;
+        deleteBtn = null;
         selectedTournament = null;
 }
 
@@ -287,20 +324,28 @@ function selectTournament(id: number): void {
 		playerList.appendChild(li);
 	});
 
-	const isCreator = userInfo && userInfo.id === tournament.creator.id;
-	const playerIds = tournament.players.map((p) => p.id);
+        const isCreator = userInfo && userInfo.id === tournament.creator.id;
+        const playerIds = tournament.players.map((p) => p.id);
 
-	if (!tournament.started && userInfo && !playerIds.includes(userInfo.id)) {
-		subscribeBtn.classList.remove("hidden");
-	} else {
-		subscribeBtn.classList.add("hidden");
-	}
+        if (!tournament.started && userInfo && !playerIds.includes(userInfo.id)) {
+                subscribeBtn.classList.remove("hidden");
+        } else {
+                subscribeBtn.classList.add("hidden");
+        }
 
-	if (!tournament.started && isCreator) {
-		startBtn.classList.remove("hidden");
-	} else {
-		startBtn.classList.add("hidden");
-	}
+        if (!tournament.started && userInfo && playerIds.includes(userInfo.id)) {
+                unsubscribeBtn?.classList.remove("hidden");
+        } else {
+                unsubscribeBtn?.classList.add("hidden");
+        }
+
+        if (!tournament.started && isCreator) {
+                startBtn.classList.remove("hidden");
+                deleteBtn?.classList.remove("hidden");
+        } else {
+                startBtn.classList.add("hidden");
+                deleteBtn?.classList.add("hidden");
+        }
 }
 
 // if logged in on page load, connect to the game server
