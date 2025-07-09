@@ -77,11 +77,11 @@ let _navProfileInitDone = false;
     renderView(overlay, data);
     wireExtraButtons(overlay, data);
     wireFriendBlock(overlay, data);
-  
+
     // Editing / 2FA only for own profile
     if (userId === window.__CURRENT_USER_ID) {
-      wireEdit(overlay, data);
-      wireTwoFactor(overlay, data);
+      const tf = wireTwoFactor(overlay, data);
+      wireEdit(overlay, data, tf);
     }
   }
   
@@ -117,7 +117,11 @@ let _navProfileInitDone = false;
    *  EDIT – alias/full‑name/avatar editing for your own profile
    *  ------------------------------------------------------------------------*/
   
-  function wireEdit(ov: HTMLElement, data: UserProfileData): void {
+  function wireEdit(
+    ov: HTMLElement,
+    data: UserProfileData,
+    tfHooks?: { enable: () => void; disable: () => void }
+  ): void {
     const edit   = ov.querySelector<HTMLButtonElement>("#pr-edit")!;
     const save   = ov.querySelector<HTMLButtonElement>("#pr-save")!;
     const cancel = ov.querySelector<HTMLButtonElement>("#pr-cancel")!;
@@ -133,6 +137,8 @@ let _navProfileInitDone = false;
       edit.classList.add("hidden");
       save.classList.remove("hidden");
       cancel.classList.remove("hidden");
+
+      tfHooks?.enable();
   
       // Replace spans with <input>
       ["alias", "full"].forEach(k => {
@@ -150,6 +156,7 @@ let _navProfileInitDone = false;
     };
   
     cancel.onclick = () => {
+      tfHooks?.disable();
       ov.remove();
       // Reload freshly to discard unsaved edits
       void openProfile(data.id);
@@ -196,17 +203,20 @@ let _navProfileInitDone = false;
    *  TWO‑FACTOR – enable/disable 2FA checkbox (only on own profile)
    *  ------------------------------------------------------------------------*/
   
-  function wireTwoFactor(ov: HTMLElement, data: UserProfileData): void {
+  function wireTwoFactor(
+    ov: HTMLElement,
+    data: UserProfileData
+  ): { enable: () => void; disable: () => void } {
     const row = ov.querySelector<HTMLElement>("#pr-2fa-row")!;
     const box = ov.querySelector<HTMLInputElement>("#pr-2fa")!;
-  
+
     row.classList.remove("hidden");
     box.checked = !!data.two_factor_auth;
-  
-    box.onchange = async () => {
+
+    const handler = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
-  
+
       const res = await fetch("/twofactor", {
         method: "PUT",
         headers: {
@@ -215,12 +225,24 @@ let _navProfileInitDone = false;
         },
         body: JSON.stringify({ enabled: box.checked })
       });
-  
+
       if (!res.ok) {
         alert("Failed to update setting");
         box.checked = !box.checked; // revert UI
       }
     };
+
+    const enable = () => {
+      box.disabled = false;
+      box.addEventListener("change", handler);
+    };
+    const disable = () => {
+      box.disabled = true;
+      box.removeEventListener("change", handler);
+    };
+
+    disable();
+    return { enable, disable };
   }
   
   /** -------------------------------------------------------------------------
