@@ -67,15 +67,13 @@ const tournamentNameInput = document.getElementById(
 	"tournamentName"
 ) as HTMLInputElement;
 
-const selectedTitle = document.getElementById(
-	"selectedTournamentTitle"
-) as HTMLElement;
-const playerList = document.getElementById("playerList") as HTMLUListElement;
-const subscribeBtn = document.getElementById(
-	"subscribeBtn"
-) as HTMLButtonElement;
-const startBtn = document.getElementById("startBtn") as HTMLButtonElement;
-const statusMessage = document.getElementById("statusMessage") as HTMLElement;
+// Elements inside the tournament modal will be resolved when opened
+let selectedTitle: HTMLElement | null = null;
+let playerList: HTMLUListElement | null = null;
+let subscribeBtn: HTMLButtonElement | null = null;
+let startBtn: HTMLButtonElement | null = null;
+let statusMessage: HTMLElement | null = null;
+let tournamentOverlay: HTMLElement | null = null;
 
 // State
 let tournaments: Tournament[] = [];
@@ -168,12 +166,8 @@ function connectGameServer(): void {
 		tournamentNameInput.value = "";
 	});
 
-	// Subscribe to tournament
-	subscribeBtn.addEventListener("click", subscribeBtnClick);
-
-	// Start tournament
-	startBtn.addEventListener("click", startBtnClick);
-	console.log("Connected to the game server");
+        // Buttons will be wired when the tournament modal is opened
+        console.log("Connected to the game server");
 }
 
 function disconnectGameServer(): void {
@@ -184,10 +178,9 @@ function disconnectGameServer(): void {
 	}
 	selectedTournament = null;
 	tournaments = [];
-	renderTournamentList();
-
-	subscribeBtn.removeEventListener("click", subscribeBtnClick);
-	startBtn.removeEventListener("click", startBtnClick);
+        renderTournamentList();
+        // Ensure modal is closed and listeners removed
+        closeTournamentModal();
 }
 
 function startBtnClick(): void {
@@ -216,15 +209,58 @@ function renderTournamentList(): void {
 		li.textContent = t.name;
                 li.className =
                         "cursor-pointer p-2 rounded border border-blue-950 bg-blue-50 hover:bg-blue-100 text-blue-950";
-		li.addEventListener("click", () => selectTournament(t.id));
+                li.addEventListener("click", () => openTournamentModal(t.id));
 		tournamentList.appendChild(li);
 	});
 }
 
+// Open the modal displaying tournament details
+function openTournamentModal(id: number): void {
+        const tpl = document.getElementById("tournament-tpl") as HTMLTemplateElement | null;
+        if (!tpl) return;
+
+        // Remove any existing overlay
+        closeTournamentModal();
+
+        const frag = tpl.content.cloneNode(true) as DocumentFragment;
+        tournamentOverlay = frag.firstElementChild as HTMLElement;
+        document.body.appendChild(tournamentOverlay);
+
+        selectedTitle = tournamentOverlay.querySelector("#selectedTournamentTitle");
+        statusMessage = tournamentOverlay.querySelector("#statusMessage");
+        playerList = tournamentOverlay.querySelector("#playerList");
+        subscribeBtn = tournamentOverlay.querySelector("#subscribeBtn");
+        startBtn = tournamentOverlay.querySelector("#startBtn");
+
+        tournamentOverlay.querySelector<HTMLButtonElement>(".close-btn")?.addEventListener("click", closeTournamentModal);
+
+        subscribeBtn?.addEventListener("click", subscribeBtnClick);
+        startBtn?.addEventListener("click", startBtnClick);
+
+        selectTournament(id);
+}
+
+function closeTournamentModal(): void {
+        subscribeBtn?.removeEventListener("click", subscribeBtnClick);
+        startBtn?.removeEventListener("click", startBtnClick);
+        tournamentOverlay?.remove();
+        tournamentOverlay = null;
+        selectedTitle = null;
+        statusMessage = null;
+        playerList = null;
+        subscribeBtn = null;
+        startBtn = null;
+        selectedTournament = null;
+}
+
 // Select a tournament
 function selectTournament(id: number): void {
-	console.log("Selected tournament:", id);
-	selectedTournament = id;
+        console.log("Selected tournament:", id);
+        selectedTournament = id;
+
+        if (!selectedTitle || !statusMessage || !playerList || !subscribeBtn || !startBtn) {
+                return;
+        }
 
 	const tournament = tournaments.find((t) => t.id === id) || null;
 	if (!tournament) {

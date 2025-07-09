@@ -3,11 +3,12 @@ import { game } from "../game_websocket/pong_websocket.js";
 const tournamentList = document.getElementById("tournamentList");
 const createTournamentForm = document.getElementById("createTournamentForm");
 const tournamentNameInput = document.getElementById("tournamentName");
-const selectedTitle = document.getElementById("selectedTournamentTitle");
-const playerList = document.getElementById("playerList");
-const subscribeBtn = document.getElementById("subscribeBtn");
-const startBtn = document.getElementById("startBtn");
-const statusMessage = document.getElementById("statusMessage");
+let selectedTitle = null;
+let playerList = null;
+let subscribeBtn = null;
+let startBtn = null;
+let statusMessage = null;
+let tournamentOverlay = null;
 let tournaments = [];
 let selectedTournament = null;
 let userInfo = null;
@@ -81,8 +82,6 @@ function connectGameServer() {
         ws.send(JSON.stringify(msg));
         tournamentNameInput.value = "";
     });
-    subscribeBtn.addEventListener("click", subscribeBtnClick);
-    startBtn.addEventListener("click", startBtnClick);
     console.log("Connected to the game server");
 }
 function disconnectGameServer() {
@@ -94,8 +93,7 @@ function disconnectGameServer() {
     selectedTournament = null;
     tournaments = [];
     renderTournamentList();
-    subscribeBtn.removeEventListener("click", subscribeBtnClick);
-    startBtn.removeEventListener("click", startBtnClick);
+    closeTournamentModal();
 }
 function startBtnClick() {
     if (selectedTournament === null)
@@ -121,14 +119,47 @@ function renderTournamentList() {
         const li = document.createElement("li");
         li.textContent = t.name;
         li.className =
-            "cursor-pointer p-2 rounded border border-blue-950 bg-amber-50 hover:bg-amber-100 text-blue-950";
-        li.addEventListener("click", () => selectTournament(t.id));
+            "cursor-pointer p-2 rounded border border-blue-950 bg-blue-50 hover:bg-blue-100 text-blue-950";
+        li.addEventListener("click", () => openTournamentModal(t.id));
         tournamentList.appendChild(li);
     });
+}
+function openTournamentModal(id) {
+    const tpl = document.getElementById("tournament-tpl");
+    if (!tpl)
+        return;
+    closeTournamentModal();
+    const frag = tpl.content.cloneNode(true);
+    tournamentOverlay = frag.firstElementChild;
+    document.body.appendChild(tournamentOverlay);
+    selectedTitle = tournamentOverlay.querySelector("#selectedTournamentTitle");
+    statusMessage = tournamentOverlay.querySelector("#statusMessage");
+    playerList = tournamentOverlay.querySelector("#playerList");
+    subscribeBtn = tournamentOverlay.querySelector("#subscribeBtn");
+    startBtn = tournamentOverlay.querySelector("#startBtn");
+    tournamentOverlay.querySelector(".close-btn")?.addEventListener("click", closeTournamentModal);
+    subscribeBtn?.addEventListener("click", subscribeBtnClick);
+    startBtn?.addEventListener("click", startBtnClick);
+    selectTournament(id);
+}
+function closeTournamentModal() {
+    subscribeBtn?.removeEventListener("click", subscribeBtnClick);
+    startBtn?.removeEventListener("click", startBtnClick);
+    tournamentOverlay?.remove();
+    tournamentOverlay = null;
+    selectedTitle = null;
+    statusMessage = null;
+    playerList = null;
+    subscribeBtn = null;
+    startBtn = null;
+    selectedTournament = null;
 }
 function selectTournament(id) {
     console.log("Selected tournament:", id);
     selectedTournament = id;
+    if (!selectedTitle || !statusMessage || !playerList || !subscribeBtn || !startBtn) {
+        return;
+    }
     const tournament = tournaments.find((t) => t.id === id) || null;
     if (!tournament) {
         selectedTitle.textContent = "Select a tournament";
@@ -147,7 +178,7 @@ function selectTournament(id) {
         const li = document.createElement("li");
         li.textContent = player.username;
         li.className =
-            "border border-blue-950 p-2 rounded bg-amber-50 text-blue-950";
+            "border border-blue-950 p-2 rounded bg-blue-50 text-blue-950";
         playerList.appendChild(li);
     });
     const isCreator = userInfo && userInfo.id === tournament.creator.id;
