@@ -33,7 +33,7 @@ let ws: WebSocket | null          = null;
 let currentUserData: User;            // full DB object for me
 let selectedFriend: number = 0;       // 0 = friend-list, -1 = “System”
 let userInfo: UserInfo | null  = null;
-let setIntervalId: number | null = null;
+let setIntervalId: ReturnType<typeof setInterval> | null = null;
 
 /* ====================================================================
  *  Connection bootstrap
