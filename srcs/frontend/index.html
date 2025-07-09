@@ -154,6 +154,7 @@
               w-11/12 sm:w-3/4 lg:w-2/3
               h-[30vh] max-h-[360px]
               flex border border-blue-950 bg-blue-50
+              rounded-lg shadow-lg
               transition-transform duration-200 transform-gpu
               translate-y-full md:translate-y-0           <!-- closed on mobile -->
               z-40">
@@ -165,7 +166,7 @@
       –
     </button>
 
-    <div id="live-chat" class="flex flex-col flex-[2] border border-blue-950 p-2 box-border relative">
+    <div id="live-chat" class="flex flex-col flex-[2] border border-blue-950 p-2 box-border relative rounded-l-lg overflow-hidden">
       <h2 class="pb-2 font-bold text-blue-950 border-b border-blue-950">Live Chat</h2>
       <div id="live-chat-content" class="flex-1 flex flex-col-reverse overflow-y-scroll min-h-0 break-all relative"></div>
       <div class="flex flex-row gap-2 p-2 border-t border-blue-950 box-border">
@@ -173,7 +174,7 @@
         <button id="live-send-button" class="px-4 py-2 bg-blue-900 text-amber-400 font-bold rounded shrink-0 hover:brightness-90">Send</button>
       </div>
     </div>
-    <div id="friends-and-chat" class="flex flex-col flex-[1] border border-blue-950 p-2 box-border relative">
+    <div id="friends-and-chat" class="flex flex-col flex-[1] border border-blue-950 p-2 box-border relative rounded-r-lg overflow-hidden">
       <div id="chat-header" class="flex flex-row bg-blue-900 text-amber-400 p-2 items-center font-bold">
         <button id="back-button" class="left-2 hover:cursor-pointer">&lt;</button>
         <a id="user-header" class="mx-auto hover:cursor-pointer">Your Username</a>
