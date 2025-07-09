@@ -97,16 +97,8 @@
   </div>
 
   <!-- Tournament Page -->
-  <div id="tournamentPage" class="route-view flex flex-col gap-6 justify-center items-stretch max-w-4xl mx-auto p-4">
-    <div class="w-full bg-blue-100 border border-blue-950 p-4 rounded-2xl shadow-lg flex flex-col">
-      <h2 class="text-xl font-bold mb-4">Tournaments</h2>
-      <ul id="tournamentList" class="space-y-2 overflow-auto max-h-full flex-1"></ul>
-      <form id="createTournamentForm" class="mt-6">
-        <input type="text" id="tournamentName" class="w-full p-2 border border-blue-950 rounded mb-2 bg-blue-50 text-blue-950" placeholder="New Tournament" required/>
-        <button type="submit" class="w-full bg-blue-900 text-amber-400 font-bold py-2 rounded hover:brightness-90">Create</button>
-      </form>
-    </div>
-    <div class="w-full bg-blue-100 border border-blue-950 p-4 rounded-2xl shadow-lg flex flex-col">
+  <div id="tournamentPage" class="route-view flex flex-col gap-6 justify-center items-center max-w-4xl mx-auto p-4">
+    <div class="w-full max-w-md bg-blue-100 p-4 rounded-2xl shadow-lg ring-2 ring-pink-500 filter drop-shadow-[0_0_6px_#ff2d95] flex flex-col">
       <h2 class="text-xl font-bold mb-4" id="selectedTournamentTitle">Select a tournament</h2>
       <p id="statusMessage" class="mb-4 text-sm text-gray-600"></p>
       <ul id="playerList" class="space-y-2 mb-4 overflow-auto max-h-full flex-1"></ul>
@@ -114,6 +106,14 @@
         <button id="subscribeBtn" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 hidden">Subscribe</button>
         <button id="startBtn" class="bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 hidden">Start Tournament</button>
       </div>
+    </div>
+    <div class="w-full max-w-md bg-blue-100 p-4 rounded-2xl shadow-lg ring-2 ring-pink-500 filter drop-shadow-[0_0_6px_#ff2d95] flex flex-col">
+      <h2 class="text-xl font-bold mb-4">Tournaments</h2>
+      <ul id="tournamentList" class="space-y-2 overflow-auto max-h-full flex-1"></ul>
+      <form id="createTournamentForm" class="mt-6">
+        <input type="text" id="tournamentName" class="w-full p-2 border border-pink-500 rounded mb-2 bg-blue-50 text-blue-950" placeholder="New Tournament" required/>
+        <button type="submit" class="w-full bg-blue-900 text-amber-400 font-bold py-2 rounded hover:brightness-90">Create</button>
+      </form>
     </div>
   </div>
 
