@@ -33,8 +33,8 @@ export async function openProfile(userId) {
     wireExtraButtons(overlay, data);
     wireFriendBlock(overlay, data);
     if (userId === window.__CURRENT_USER_ID) {
-        wireEdit(overlay, data);
-        wireTwoFactor(overlay, data);
+        const tf = wireTwoFactor(overlay, data);
+        wireEdit(overlay, data, tf);
     }
 }
 function renderView(ov, d) {
@@ -55,7 +55,7 @@ function renderView(ov, d) {
             el.classList.add("hidden");
     });
 }
-function wireEdit(ov, data) {
+function wireEdit(ov, data, tfHooks) {
     const edit = ov.querySelector("#pr-edit");
     const save = ov.querySelector("#pr-save");
     const cancel = ov.querySelector("#pr-cancel");
@@ -67,6 +67,7 @@ function wireEdit(ov, data) {
         edit.classList.add("hidden");
         save.classList.remove("hidden");
         cancel.classList.remove("hidden");
+        tfHooks?.enable();
         ["alias", "full"].forEach(k => {
             const span = ov.querySelector(`#pr-${k}`);
             const val = span.textContent ?? "";
@@ -78,6 +79,7 @@ function wireEdit(ov, data) {
         ov.querySelector("#pr-avatar")?.insertAdjacentHTML("afterend", `<input id="pr-avatar-in" type="file" accept="image/*" class="block my-2 text-blue-950" />`);
     };
     cancel.onclick = () => {
+        tfHooks?.disable();
         ov.remove();
         void openProfile(data.id);
     };
@@ -122,7 +124,7 @@ function wireTwoFactor(ov, data) {
     const box = ov.querySelector("#pr-2fa");
     row.classList.remove("hidden");
     box.checked = !!data.two_factor_auth;
-    box.onchange = async () => {
+    const handler = async () => {
         const token = localStorage.getItem("token");
         if (!token)
             return;
@@ -139,6 +141,16 @@ function wireTwoFactor(ov, data) {
             box.checked = !box.checked;
         }
     };
+    const enable = () => {
+        box.disabled = false;
+        box.addEventListener("change", handler);
+    };
+    const disable = () => {
+        box.disabled = true;
+        box.removeEventListener("change", handler);
+    };
+    disable();
+    return { enable, disable };
 }
 function wireExtraButtons(ov, data) {
     const friendsBtn = ov.querySelector("#pr-friends");
