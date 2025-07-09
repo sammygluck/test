@@ -259,8 +259,11 @@ async function updateGameHeader(tournamentUpdateMessage) {
     });
     const player1Data = await response.json();
     if (response.ok && player1Data) {
-        player1Name.textContent = player1Data.username;
-        player1Avatar.src = player1Data.avatar || "default-avatar.svg";
+        const alias1 = (player1Data.alias ?? "").trim() || player1Data.username;
+        player1Name.textContent = alias1;
+        player1Avatar.src = player1Data.avatar
+            ? `/uploads/${player1Data.avatar}?_=${Date.now()}`
+            : "/assets/default-avatar.png";
     }
     response = await fetch("/user/" + player2.id, {
         method: "GET",
@@ -270,8 +273,11 @@ async function updateGameHeader(tournamentUpdateMessage) {
     });
     const player2Data = await response.json();
     if (response.ok && player2Data) {
-        player2Name.textContent = player2Data.username;
-        player2Avatar.src = player2Data.avatar || "default-avatar.svg";
+        const alias2 = (player2Data.alias ?? "").trim() || player2Data.username;
+        player2Name.textContent = alias2;
+        player2Avatar.src = player2Data.avatar
+            ? `/uploads/${player2Data.avatar}?_=${Date.now()}`
+            : "/assets/default-avatar.png";
     }
     const player1Score = player1.score || 0;
     const player2Score = player2.score || 0;

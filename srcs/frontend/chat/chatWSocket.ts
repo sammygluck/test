@@ -75,7 +75,7 @@ function connectChat(): void {
 
       /* make sender’s name clickable if provided */
       if (data.sendId) {
-        m.className = "view-profile cursor-pointer";
+        m.className = "view-profile cursor-pointer hover:underline hover:opacity-80";
         m.dataset.userid = String(data.sendId);
       }
       LChatContent.prepend(m);
@@ -197,7 +197,7 @@ function updateChatHeader(userId: number = 0) {
 
   const name = currentUserData.friendlist.find(f => f.id === userId)?.username || "Unknown";
   userHeader.textContent = name;
-  userHeader.classList.add("view-profile");
+  userHeader.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
   userHeader.dataset.userid = String(userId);
   userHeader.onclick = () => openProfile(userId);
 }
@@ -237,7 +237,7 @@ function loadFriendList(list: Friend[] = currentUserData.friendlist) {
     /* name span → opens profile modal */
     const name = document.createElement("span");
     name.textContent = friend.username;
-    name.className   = "view-profile text-blue-950";
+    name.className   = "view-profile text-blue-950 cursor-pointer hover:underline hover:opacity-80";
     name.dataset.userid = String(friend.id);
 
     /* online status dot */
@@ -373,7 +373,7 @@ function loadSystemChat() {
     const [senderId, msg] = line.split("::");
     const el = document.createElement("div");
     el.textContent = msg;
-    el.className = "view-profile cursor-pointer";
+    el.className = "view-profile cursor-pointer hover:underline hover:opacity-80";
     el.dataset.userid = senderId;
     chatContent.prepend(el);
   });
