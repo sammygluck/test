@@ -1,13 +1,14 @@
 const broadcast = require("./game_management.js").broadcast;
 // Coordinate system: X 0–200, Y 0–100  (percentage of canvas height).
 const PADDLE_H = 14;
-const PADDLE_S = 55;
+const PADDLE_S = 55; // speed of paddle movement
 const SPEED_UP = 1.05; // +5 % ball speed each paddle hit
 const MAX_SPEED = 120; // hard cap in %/s  – raise or delete if you want
 const SPIN_FACTOR = 0.25; // tweak 0.15-0.35 to taste
 const BASE_SPEED = 50; // 50 %/s baseline
 var userInput;
 (function (userInput) {
+    userInput[userInput["unknown"] = 0] = "unknown";
     userInput[userInput["moveUpStart"] = 1] = "moveUpStart";
     userInput[userInput["moveUpEnd"] = 2] = "moveUpEnd";
     userInput[userInput["moveDownStart"] = 3] = "moveDownStart";
@@ -26,6 +27,7 @@ class Paddle {
     height;
     speed;
     dy;
+    nextDy; // used to store the speed based on the user input
     constructor(x, y, width, height, speed) {
         this.x = x;
         this.y = y;
@@ -33,6 +35,7 @@ class Paddle {
         this.height = height;
         this.speed = speed;
         this.dy = 0;
+        this.nextDy = 0;
     }
     move(duration) {
         this.y += (this.dy * duration) / 1000;
@@ -42,24 +45,28 @@ class Paddle {
         else if (this.y + this.height > 100) {
             this.y = 100 - this.height;
         }
+        this.dy = this.nextDy; // update dy to nextDy after moving
     }
     handleInput(command) {
         switch (command) {
             case userInput.moveUpStart:
-                this.dy = -this.speed;
+                this.nextDy = -this.speed;
                 break;
             case userInput.moveUpEnd:
-                if (this.dy < 0)
-                    this.dy = 0;
+                if (this.nextDy < 0)
+                    this.nextDy = 0;
                 break;
             case userInput.moveDownEnd:
-                if (this.dy > 0)
-                    this.dy = 0;
+                if (this.nextDy > 0)
+                    this.nextDy = 0;
                 break;
             case userInput.moveDownStart:
-                this.dy = this.speed;
+                this.nextDy = this.speed;
                 break;
         }
+    }
+    getData() {
+        return { y: this.y, speed: this.dy };
     }
 }
 class Ball {
@@ -81,7 +88,9 @@ class Ball {
         if ((this.y - this.radius <= 0 && this.speedY < 0) ||
             (this.y + this.radius >= 100 && this.speedY > 0)) {
             this.speedY *= -1;
+            return true;
         }
+        return false;
     }
     checkCollision(paddle) {
         const closestX = Math.max(paddle.x, Math.min(this.x, paddle.x + paddle.width));
@@ -91,7 +100,7 @@ class Ball {
         /* no hit if centre–to–closest distance longer than radius */
         const dist2 = dx * dx + dy * dy;
         if (dist2 > this.radius * this.radius)
-            return;
+            return false;
         /* push out so ball never sinks into the paddle */
         const dist = Math.sqrt(dist2) || 1e-6;
         const overlap = this.radius - dist;
@@ -100,14 +109,11 @@ class Ball {
         this.x += nx * overlap;
         this.y += ny * overlap;
         /* compute new velocity based on impact point */
-        //   const speed   = Math.hypot(this.speedX, this.speedY);
         let speed = Math.hypot(this.speedX, this.speedY) * SPEED_UP;
         if (speed > MAX_SPEED)
             speed = MAX_SPEED;
         const relY = -((this.y - (paddle.y + paddle.height / 2)) /
             (paddle.height / 2));
-        // const MAX     = 75 * Math.PI / 180;                                // 75°
-        // const angle   = relY * MAX;
         const MAX = (60 * Math.PI) / 180; // 60°, easier to track
         const angle = Math.sin((relY * Math.PI) / 2) * MAX;
         const dir = paddle.x < 100 ? 1 : -1; // left paddle sends right, vice-versa
@@ -117,9 +123,10 @@ class Ball {
         const mag = Math.hypot(this.speedX, this.speedY); // keep overall speed constant
         this.speedX *= speed / mag;
         this.speedY *= speed / mag;
+        return true;
     }
-    getPosition() {
-        return { x: this.x, y: this.y };
+    getData() {
+        return { x: this.x, y: this.y, speedX: this.speedX, speedY: this.speedY };
     }
 }
 class Game {
@@ -134,6 +141,7 @@ class Game {
     scoreToWin;
     isRunning;
     isPaused;
+    sendAtNextTick;
     resolver; // start promise will resolve when game ends
     constructor(matchData, scoreToWin = 10) {
         this.paddleLeft = new Paddle(1, 45, 2, PADDLE_H, PADDLE_S);
@@ -145,12 +153,14 @@ class Game {
         this.scoreToWin = scoreToWin;
         this.isRunning = false;
         this.isPaused = false;
+        this.sendAtNextTick = false;
     }
     start() {
         // start the game loop
         this.setIntervalId = setInterval(() => this.loop(), 1000 / 60);
         this.prevTime = performance.now();
         this.isRunning = true;
+        this.send(); // send initial state
         return new Promise((resolve) => {
             // start promise will resolve when game ends
             this.resolver = resolve;
@@ -168,6 +178,7 @@ class Game {
         // stop the game loop
         this.isRunning = false;
         this.isPaused = false;
+        this.send(); // send final state
         if (this.setIntervalId !== null) {
             clearInterval(this.setIntervalId);
             this.setIntervalId = null;
@@ -181,9 +192,11 @@ class Game {
     handleInput(cmd, userid) {
         if (this.matchData.player1.id === userid) {
             this.paddleLeft.handleInput(cmd);
+            this.sendAtNextTick = true; // send at next loop iteration
         }
         else if (this.matchData.player2.id === userid) {
             this.paddleRight.handleInput(cmd);
+            this.sendAtNextTick = true; // send at next loop iteration
         }
     }
     addPoint(paddle) {
@@ -206,24 +219,31 @@ class Game {
             this.update(dt);
         this.prevTime = timestamp;
         // send info over websocket
-        this.send();
+        if (this.sendAtNextTick) {
+            this.send();
+        }
     }
     send() {
         const data = {
-            paddleLeft: this.paddleLeft.y,
-            paddleRight: this.paddleRight.y,
-            ball: this.ball.getPosition(),
-            scoreLeft: this.matchData.player1.score,
-            scoreRight: this.matchData.player2.score,
+            paddleLeft: this.paddleLeft.getData(),
+            paddleRight: this.paddleRight.getData(),
+            ball: this.ball.getData(),
+            isRunning: this.isRunning,
+            time: performance.now(),
         };
         broadcast({ type: "game", data: data });
+        this.sendAtNextTick = false; // reset flag
     }
     update(duration) {
         this.paddleLeft.move(duration);
         this.paddleRight.move(duration);
-        this.ball.move(duration);
-        this.ball.checkCollision(this.paddleLeft);
-        this.ball.checkCollision(this.paddleRight);
+        if (this.ball.move(duration)) {
+            this.send();
+        }
+        if (this.ball.checkCollision(this.paddleLeft) || this.ball.checkCollision(this.paddleRight)) {
+            this.send();
+        }
+        ;
         if (this.ball.x < this.paddleLeft.x - this.ball.radius) {
             this.addPoint(paddleSide.right);
             this.resetBall();
@@ -241,9 +261,9 @@ class Game {
         const dir = this.ball.speedX < 0 ? 1 : -1; // pre-reset sign tells us who lost
         this.ball.speedX = BASE_SPEED * dir;
         this.ball.speedY = 0; // start flat; first paddle sets angle
+        this.send();
     }
 }
-//const game = new Game();
 module.exports = {
     Game: Game,
 };

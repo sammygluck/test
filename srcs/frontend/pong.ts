@@ -303,8 +303,33 @@ class Game {
  * 5.  Boot + UI wiring
  * --------------------------------------------------------------------- */
 
-canvas.width  = 800;
-canvas.height = 400;
+function resizeCanvas(): void {
+	if (!canvas) return;
+
+	const aspectRatio = 2 / 1;
+	const maxHeight = (window.innerHeight - 210) * 0.5;
+	const maxWidth = window.innerWidth;
+
+	let width = maxWidth;
+	let height = width / aspectRatio;
+
+	if (height > maxHeight) {
+		height = maxHeight;
+		width = height * aspectRatio;
+	}
+
+	canvas.style.width = `${width}px`;
+	canvas.style.height = `${height}px`;
+
+	canvas.width = width;
+	canvas.height = height;
+}
+
+// Run on page load
+resizeCanvas();
+
+// Update on window resize
+window.addEventListener("resize", resizeCanvas);
 
 const game = new Game(canvas);
 

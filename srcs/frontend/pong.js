@@ -247,8 +247,25 @@ class Game {
         this.render();
     }
 }
-canvas.width = 800;
-canvas.height = 400;
+function resizeCanvas() {
+    if (!canvas)
+        return;
+    const aspectRatio = 2 / 1;
+    const maxHeight = (window.innerHeight - 210) * 0.5;
+    const maxWidth = window.innerWidth;
+    let width = maxWidth;
+    let height = width / aspectRatio;
+    if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
+    }
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    canvas.width = width;
+    canvas.height = height;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 const game = new Game(canvas);
 btnPlay.onclick = () => {
     game.start();

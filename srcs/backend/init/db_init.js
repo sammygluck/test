@@ -7,12 +7,13 @@ const db = new sqlite3.Database("../db/db.sqlite", (err) => {
 	}
 });
 
-//friends is a json array, for example  '["2", "3", "5", "7"]'
+//friends is a json array, for example  '[2, 3, 5, 7]'
 
 db.run(
-	`CREATE TABLE IF NOT EXISTS users (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	username TEXT NOT NULL UNIQUE,
+        `CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        alias TEXT DEFAULT NULL,
 	full_name TEXT DEFAULT NULL,
 	email TEXT NOT NULL UNIQUE,
 	password_hash TEXT,
@@ -22,13 +23,13 @@ db.run(
 	two_factor_auth	BOOLEAN DEFAULT FALSE,
 	blocked_users TEXT DEFAULT NULL,
 	friends TEXT DEFAULT NULL,
-	avatar TEXT DEFAULT NULL
-	)`,
-	(err) => {
-		if (err) {
-			console.error(err.message);
-		}
-	}
+        avatar TEXT DEFAULT NULL
+        )`,
+        (err) => {
+                if (err) {
+                        console.error(err.message);
+                }
+        }
 );
 
 db.run(`
@@ -45,7 +46,7 @@ db.run(`
     FOREIGN KEY (tournamentId) REFERENCES tournament(tournamentId)
 )`);
 
-//players is a json array, for example  '["2", "3", "5", "7"]'
+//players is a json array, for example  '[2, 3, 5, 7]'
 
 db.run(`
 	CREATE TABLE IF NOT EXISTS tournament (

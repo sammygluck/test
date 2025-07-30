@@ -70,7 +70,6 @@ async function game_management(fastify) {
 					],
 					started: false,
 				};
-				console.log(tournament);
 				openTournaments.push(tournament);
 			} catch (error) {
 				console.error("Error inviting user: " + error.message);
@@ -103,7 +102,6 @@ async function game_management(fastify) {
 		clients.push(socket);
 		socket.onmessage = async (message) => {
 			const msg = JSON.parse(message.data);
-			console.log("Received message:", msg);
 			if (msg.type === "game") {
 				if (game) {
 					game.handleInput(msg.cmd, socket.user.id);
@@ -135,6 +133,24 @@ async function game_management(fastify) {
 						username: socket.user.username,
 						email: socket.user.email,
 					});
+				}
+				broadcast({ type: "tournaments", data: openTournaments });
+			} else if (msg.type === "unsubscribe") {
+				const tournament = openTournaments.find((t) => t.id === msg.tournament);
+				if (tournament) {
+					tournament.players = tournament.players.filter(
+						(p) => p.id !== socket.user.id
+					);
+				}
+				broadcast({ type: "tournaments", data: openTournaments });
+			} else if (msg.type === "delete_tournament") {
+				const index = openTournaments.findIndex((t) => t.id === msg.tournament);
+				if (
+					index !== -1 &&
+					openTournaments[index].creator.id === socket.user.id &&
+					!openTournaments[index].started
+				) {
+					openTournaments.splice(index, 1);
 				}
 				broadcast({ type: "tournaments", data: openTournaments });
 			} else if (msg.type === "start_tournament") {
@@ -194,22 +210,23 @@ async function game_management(fastify) {
 					index = i;
 				}
 				if (index >= 0) {
+					const tournament = openTournaments[index];
+					openTournaments.splice(index, 1); // remove 1 element at index
 					// insert in database and update id here
 					const result = await fastify.sqlite.run(
 						"INSERT INTO tournament (name, creator, players, scoreToWin) VALUES (?, ?, ?, ?)",
 						[
-							openTournaments[index].name,
-							openTournaments[index].creator.id,
-							JSON.stringify(openTournaments[index].players.map((p) => p.id)),
-							openTournaments[index].scoreToWin,
+							tournament.name,
+							tournament.creator.id,
+							JSON.stringify(tournament.players.map((p) => p.id)),
+							tournament.scoreToWin,
 						]
 					);
 					if (result) {
 						// update id with database id
-						openTournaments[index].id = result.lastID;
+						tournament.id = result.lastID;
 					}
-					currentTournament = openTournaments[index];
-					openTournaments.splice(index, 1); // remove 1 element at index
+					currentTournament = tournament;
 				}
 			}
 		}

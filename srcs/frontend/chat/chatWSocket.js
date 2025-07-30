@@ -57,7 +57,7 @@ function connectChat() {
             const m = document.createElement("div");
             m.textContent = data.message;
             if (data.sendId) {
-                m.className = "view-profile cursor-pointer";
+                m.className = "view-profile cursor-pointer hover:underline hover:opacity-80";
                 m.dataset.userid = String(data.sendId);
             }
             LChatContent.prepend(m);
@@ -168,7 +168,7 @@ function updateChatHeader(userId = 0) {
     }
     const name = currentUserData.friendlist.find(f => f.id === userId)?.username || "Unknown";
     userHeader.textContent = name;
-    userHeader.classList.add("view-profile");
+    userHeader.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
     userHeader.dataset.userid = String(userId);
     userHeader.onclick = () => openProfile(userId);
 }
@@ -199,7 +199,7 @@ function loadFriendList(list = currentUserData.friendlist) {
         row.className = rowBaseClass(friend.new_message) + " flex items-center gap-2";
         const name = document.createElement("span");
         name.textContent = friend.username;
-        name.className = "view-profile text-blue-950";
+        name.className = "view-profile text-blue-950 cursor-pointer hover:underline hover:opacity-80";
         name.dataset.userid = String(friend.id);
         const dot = document.createElement("span");
         dot.className = friend.online
@@ -311,7 +311,7 @@ function loadSystemChat() {
         const [senderId, msg] = line.split("::");
         const el = document.createElement("div");
         el.textContent = msg;
-        el.className = "view-profile cursor-pointer";
+        el.className = "view-profile cursor-pointer hover:underline hover:opacity-80";
         el.dataset.userid = senderId;
         chatContent.prepend(el);
     });

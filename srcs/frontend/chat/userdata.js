@@ -11,7 +11,7 @@ export async function fetchUserData(userID) {
         }
         const userData = await userResponse.json();
         if (!userData.blocked_users)
-            userData.blocked_users = '[]';
+            userData.blocked_users = "[]";
         if (userData.friends) {
             const friendDetails = await Promise.all(JSON.parse(userData.friends).map(async (friendId) => {
                 const friendResponse = await fetch(`/user/${friendId}`, {
@@ -41,7 +41,6 @@ export async function fetchUserData(userID) {
     }
     catch (error) {
         console.error("Error fetching user data:", error);
-        alert("Failed to load user data. Please try again later.");
     }
     return null;
 }

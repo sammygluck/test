@@ -1,7 +1,7 @@
 import { handleRouteChange } from "../router.js";
 import { connectGameServer, disconnectGameServer, } from "../tournament/script.js";
 import { connectChat, disconnectChat } from "../chat/chatWSocket.js";
-import { initNavProfile } from "../chat/app.js";
+import { initNavProfile } from "../profile.js";
 let isLogin = true;
 function toggleForm() {
     isLogin = !isLogin;

@@ -3,7 +3,7 @@ async function routes(fastify, options) {
 	fastify.get(
 		"/matchhistory/:userid",
 		{
-			//onRequest: [fastify.authenticate],
+			onRequest: [fastify.authenticate],
 		},
 		async (request, reply) => {
 			if (!request.params.userid) {

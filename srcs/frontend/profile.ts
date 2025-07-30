@@ -3,11 +3,15 @@
  *  ------------------------------------------------------------------------*/
 
 declare global {
-    interface Window {
-      /** Set by `initNavProfile()` so other modules can reference the logged‑in user */
-      __CURRENT_USER_ID: number | null;
-    }
+  interface Window {
+    /** Set by `initNavProfile()` so other modules can reference the logged‑in user */
+    __CURRENT_USER_ID: number | null;
   }
+}
+
+let __CURRENT_USER_ID: number | null = null;
+window.__CURRENT_USER_ID = null;
+let _navProfileInitDone = false;
   
   export interface UserProfileData {
     id: number;
@@ -73,11 +77,17 @@ declare global {
     renderView(overlay, data);
     wireExtraButtons(overlay, data);
     wireFriendBlock(overlay, data);
-  
-    // Editing / 2FA only for own profile
+
+    // If viewing own profile, also refresh the navbar avatar
     if (userId === window.__CURRENT_USER_ID) {
-      wireEdit(overlay, data);
-      wireTwoFactor(overlay, data);
+      const navAvatar = document.getElementById("navAvatar") as HTMLImageElement | null;
+      if (navAvatar)
+        navAvatar.src = data.avatar
+          ? `/uploads/${data.avatar}?_=${Date.now()}`
+          : "/assets/default-avatar.png";
+
+      const tf = wireTwoFactor(overlay, data);
+      wireEdit(overlay, data, tf);
     }
   }
   
@@ -113,7 +123,11 @@ declare global {
    *  EDIT – alias/full‑name/avatar editing for your own profile
    *  ------------------------------------------------------------------------*/
   
-  function wireEdit(ov: HTMLElement, data: UserProfileData): void {
+  function wireEdit(
+    ov: HTMLElement,
+    data: UserProfileData,
+    tfHooks?: { enable: () => void; disable: () => void }
+  ): void {
     const edit   = ov.querySelector<HTMLButtonElement>("#pr-edit")!;
     const save   = ov.querySelector<HTMLButtonElement>("#pr-save")!;
     const cancel = ov.querySelector<HTMLButtonElement>("#pr-cancel")!;
@@ -129,6 +143,8 @@ declare global {
       edit.classList.add("hidden");
       save.classList.remove("hidden");
       cancel.classList.remove("hidden");
+
+      tfHooks?.enable();
   
       // Replace spans with <input>
       ["alias", "full"].forEach(k => {
@@ -146,6 +162,7 @@ declare global {
     };
   
     cancel.onclick = () => {
+      tfHooks?.disable();
       ov.remove();
       // Reload freshly to discard unsaved edits
       void openProfile(data.id);
@@ -192,17 +209,20 @@ declare global {
    *  TWO‑FACTOR – enable/disable 2FA checkbox (only on own profile)
    *  ------------------------------------------------------------------------*/
   
-  function wireTwoFactor(ov: HTMLElement, data: UserProfileData): void {
+  function wireTwoFactor(
+    ov: HTMLElement,
+    data: UserProfileData
+  ): { enable: () => void; disable: () => void } {
     const row = ov.querySelector<HTMLElement>("#pr-2fa-row")!;
     const box = ov.querySelector<HTMLInputElement>("#pr-2fa")!;
-  
+
     row.classList.remove("hidden");
     box.checked = !!data.two_factor_auth;
-  
-    box.onchange = async () => {
+
+    const handler = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
-  
+
       const res = await fetch("/twofactor", {
         method: "PUT",
         headers: {
@@ -211,12 +231,24 @@ declare global {
         },
         body: JSON.stringify({ enabled: box.checked })
       });
-  
+
       if (!res.ok) {
         alert("Failed to update setting");
         box.checked = !box.checked; // revert UI
       }
     };
+
+    const enable = () => {
+      box.disabled = false;
+      box.addEventListener("change", handler);
+    };
+    const disable = () => {
+      box.disabled = true;
+      box.removeEventListener("change", handler);
+    };
+
+    disable();
+    return { enable, disable };
   }
   
   /** -------------------------------------------------------------------------
@@ -249,7 +281,7 @@ declare global {
       const ul = document.createElement("ul");
       rows.forEach(u => {
         const li = document.createElement("li");
-        li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline" data-userid="${u.id}">${u.username}</span>`;
+        li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80" data-userid="${u.id}">${u.username}</span>`;
         ul.appendChild(li);
       });
       extraBox.replaceChildren(ul);
@@ -364,4 +396,82 @@ declare global {
       };
     })();
   }
-  
+/** -----------------------------------------------------------------------
+ *  NAVBAR PROFILE INITIALISATION (migrated from chat/app.js)
+ *  --------------------------------------------------------------------*/
+
+export function initNavProfile(): void {
+  let userInfoGlobal: any;
+
+  const buf = localStorage.getItem("userInfo");
+  if (!buf) {
+    document.getElementById("chat-block")?.classList.add("hidden");
+    if (window.location.pathname !== "/login") {
+      window.location.href = "/login";
+    }
+    return;
+  }
+  userInfoGlobal = JSON.parse(buf);
+
+  const avatarEl = document.getElementById("navAvatar");
+  if (avatarEl) {
+    avatarEl.dataset.userid = String(userInfoGlobal.id);
+    avatarEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
+  }
+
+  (async () => {
+    const userInfo = userInfoGlobal;
+    localStorage.setItem("token", userInfo.token);
+
+    const me = await fetch("/currentuser", {
+      headers: { Authorization: `Bearer ${userInfo.token}` }
+    }).then(r => r.json()).catch(() => null);
+    if (!me) { window.location.href = "/login"; return; }
+    __CURRENT_USER_ID = window.__CURRENT_USER_ID = me.id;
+    const avatar = document.getElementById("navAvatar") as HTMLImageElement | null;
+    if (avatar) {
+      avatar.dataset.userid = String(me.id);
+      avatar.src = me.avatar ? `/uploads/${me.avatar}?_=${Date.now()}` : "/assets/default-avatar.png";
+    }
+    const nameEl = document.getElementById("navUsername");
+    if (nameEl) {
+      const aliasVal = (me.alias ?? "").trim() || me.username;
+      nameEl.textContent = aliasVal;
+      nameEl.dataset.userid = String(me.id);
+      nameEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
+    }
+  })();
+
+  if (!_navProfileInitDone) {
+    document.body.addEventListener("click", e => {
+      const t = (e.target as HTMLElement).closest(".view-profile");
+      if (!t) return;
+
+      const raw = (t as HTMLElement).dataset.userid;
+      const userId = parseInt(raw ?? "", 10);
+      if (Number.isNaN(userId)) {
+        console.warn("view-profile clicked but data-userid is invalid:", raw);
+        return;
+      }
+
+      openProfile(userId);
+    });
+
+    document.getElementById("view-my-profile")?.addEventListener("click", () => {
+      if (window.__CURRENT_USER_ID)
+        openProfile(window.__CURRENT_USER_ID);
+    });
+
+    _navProfileInitDone = true;
+  }
+
+  const nameEl = document.getElementById("navUsername");
+  if (nameEl) {
+    const aliasVal = (userInfoGlobal.alias ?? "").trim() || userInfoGlobal.username;
+    nameEl.textContent = aliasVal;
+    nameEl.dataset.userid = String(userInfoGlobal.id);
+    nameEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
+  }
+}
+
+initNavProfile(); 

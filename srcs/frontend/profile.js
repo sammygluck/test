@@ -1,3 +1,6 @@
+let __CURRENT_USER_ID = null;
+window.__CURRENT_USER_ID = null;
+let _navProfileInitDone = false;
 export async function openProfile(userId) {
     const tpl = document.getElementById("profile-tpl");
     if (!tpl)
@@ -30,8 +33,13 @@ export async function openProfile(userId) {
     wireExtraButtons(overlay, data);
     wireFriendBlock(overlay, data);
     if (userId === window.__CURRENT_USER_ID) {
-        wireEdit(overlay, data);
-        wireTwoFactor(overlay, data);
+        const navAvatar = document.getElementById("navAvatar");
+        if (navAvatar)
+            navAvatar.src = data.avatar
+                ? `/uploads/${data.avatar}?_=${Date.now()}`
+                : "/assets/default-avatar.png";
+        const tf = wireTwoFactor(overlay, data);
+        wireEdit(overlay, data, tf);
     }
 }
 function renderView(ov, d) {
@@ -52,7 +60,7 @@ function renderView(ov, d) {
             el.classList.add("hidden");
     });
 }
-function wireEdit(ov, data) {
+function wireEdit(ov, data, tfHooks) {
     const edit = ov.querySelector("#pr-edit");
     const save = ov.querySelector("#pr-save");
     const cancel = ov.querySelector("#pr-cancel");
@@ -64,6 +72,7 @@ function wireEdit(ov, data) {
         edit.classList.add("hidden");
         save.classList.remove("hidden");
         cancel.classList.remove("hidden");
+        tfHooks?.enable();
         ["alias", "full"].forEach(k => {
             const span = ov.querySelector(`#pr-${k}`);
             const val = span.textContent ?? "";
@@ -75,6 +84,7 @@ function wireEdit(ov, data) {
         ov.querySelector("#pr-avatar")?.insertAdjacentHTML("afterend", `<input id="pr-avatar-in" type="file" accept="image/*" class="block my-2 text-blue-950" />`);
     };
     cancel.onclick = () => {
+        tfHooks?.disable();
         ov.remove();
         void openProfile(data.id);
     };
@@ -119,7 +129,7 @@ function wireTwoFactor(ov, data) {
     const box = ov.querySelector("#pr-2fa");
     row.classList.remove("hidden");
     box.checked = !!data.two_factor_auth;
-    box.onchange = async () => {
+    const handler = async () => {
         const token = localStorage.getItem("token");
         if (!token)
             return;
@@ -136,6 +146,16 @@ function wireTwoFactor(ov, data) {
             box.checked = !box.checked;
         }
     };
+    const enable = () => {
+        box.disabled = false;
+        box.addEventListener("change", handler);
+    };
+    const disable = () => {
+        box.disabled = true;
+        box.removeEventListener("change", handler);
+    };
+    disable();
+    return { enable, disable };
 }
 function wireExtraButtons(ov, data) {
     const friendsBtn = ov.querySelector("#pr-friends");
@@ -160,7 +180,7 @@ function wireExtraButtons(ov, data) {
         const ul = document.createElement("ul");
         rows.forEach(u => {
             const li = document.createElement("li");
-            li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline" data-userid="${u.id}">${u.username}</span>`;
+            li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80" data-userid="${u.id}">${u.username}</span>`;
             ul.appendChild(li);
         });
         extraBox.replaceChildren(ul);
@@ -256,3 +276,71 @@ function wireFriendBlock(ov, data) {
         };
     })();
 }
+export function initNavProfile() {
+    let userInfoGlobal;
+    const buf = localStorage.getItem("userInfo");
+    if (!buf) {
+        document.getElementById("chat-block")?.classList.add("hidden");
+        if (window.location.pathname !== "/login") {
+            window.location.href = "/login";
+        }
+        return;
+    }
+    userInfoGlobal = JSON.parse(buf);
+    const avatarEl = document.getElementById("navAvatar");
+    if (avatarEl) {
+        avatarEl.dataset.userid = String(userInfoGlobal.id);
+        avatarEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
+    }
+    (async () => {
+        const userInfo = userInfoGlobal;
+        localStorage.setItem("token", userInfo.token);
+        const me = await fetch("/currentuser", {
+            headers: { Authorization: `Bearer ${userInfo.token}` }
+        }).then(r => r.json()).catch(() => null);
+        if (!me) {
+            window.location.href = "/login";
+            return;
+        }
+        __CURRENT_USER_ID = window.__CURRENT_USER_ID = me.id;
+        const avatar = document.getElementById("navAvatar");
+        if (avatar) {
+            avatar.dataset.userid = String(me.id);
+            avatar.src = me.avatar ? `/uploads/${me.avatar}?_=${Date.now()}` : "/assets/default-avatar.png";
+        }
+        const nameEl = document.getElementById("navUsername");
+        if (nameEl) {
+            const aliasVal = (me.alias ?? "").trim() || me.username;
+            nameEl.textContent = aliasVal;
+            nameEl.dataset.userid = String(me.id);
+            nameEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
+        }
+    })();
+    if (!_navProfileInitDone) {
+        document.body.addEventListener("click", e => {
+            const t = e.target.closest(".view-profile");
+            if (!t)
+                return;
+            const raw = t.dataset.userid;
+            const userId = parseInt(raw ?? "", 10);
+            if (Number.isNaN(userId)) {
+                console.warn("view-profile clicked but data-userid is invalid:", raw);
+                return;
+            }
+            openProfile(userId);
+        });
+        document.getElementById("view-my-profile")?.addEventListener("click", () => {
+            if (window.__CURRENT_USER_ID)
+                openProfile(window.__CURRENT_USER_ID);
+        });
+        _navProfileInitDone = true;
+    }
+    const nameEl = document.getElementById("navUsername");
+    if (nameEl) {
+        const aliasVal = (userInfoGlobal.alias ?? "").trim() || userInfoGlobal.username;
+        nameEl.textContent = aliasVal;
+        nameEl.dataset.userid = String(userInfoGlobal.id);
+        nameEl.classList.add("view-profile", "cursor-pointer", "hover:underline", "hover:opacity-80");
+    }
+}
+initNavProfile();

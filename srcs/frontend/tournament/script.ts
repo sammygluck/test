@@ -23,10 +23,12 @@ interface UserInfo {
 }
 
 type ClientMessage =
-	| { type: "list_tournaments" }
-	| { type: "create_tournament"; name: string }
-	| { type: "subscribe"; tournament: number }
-	| { type: "start_tournament"; tournament: number };
+        | { type: "list_tournaments" }
+        | { type: "create_tournament"; name: string }
+        | { type: "subscribe"; tournament: number }
+        | { type: "unsubscribe"; tournament: number }
+        | { type: "delete_tournament"; tournament: number }
+        | { type: "start_tournament"; tournament: number };
 
 interface TournamentsMessage {
 	type: "tournaments";
@@ -67,15 +69,15 @@ const tournamentNameInput = document.getElementById(
 	"tournamentName"
 ) as HTMLInputElement;
 
-const selectedTitle = document.getElementById(
-	"selectedTournamentTitle"
-) as HTMLElement;
-const playerList = document.getElementById("playerList") as HTMLUListElement;
-const subscribeBtn = document.getElementById(
-	"subscribeBtn"
-) as HTMLButtonElement;
-const startBtn = document.getElementById("startBtn") as HTMLButtonElement;
-const statusMessage = document.getElementById("statusMessage") as HTMLElement;
+// Elements inside the tournament modal will be resolved when opened
+let selectedTitle: HTMLElement | null = null;
+let playerList: HTMLUListElement | null = null;
+let subscribeBtn: HTMLButtonElement | null = null;
+let unsubscribeBtn: HTMLButtonElement | null = null;
+let startBtn: HTMLButtonElement | null = null;
+let deleteBtn: HTMLButtonElement | null = null;
+let statusMessage: HTMLElement | null = null;
+let tournamentOverlay: HTMLElement | null = null;
 
 // State
 let tournaments: Tournament[] = [];
@@ -145,7 +147,7 @@ function connectGameServer(): void {
 			}
 		} else if (msg.type === "game") {
 			// Handle game updates
-			game.updateGameState(msg as GameMessage);
+			game.receiveMessage(msg as GameMessage);
 		} else if (msg.type === "nextMatch") {
 			// Handle next match updates
 			const tournamentUpdate = msg as tournamentUpdateMessage;
@@ -168,12 +170,8 @@ function connectGameServer(): void {
 		tournamentNameInput.value = "";
 	});
 
-	// Subscribe to tournament
-	subscribeBtn.addEventListener("click", subscribeBtnClick);
-
-	// Start tournament
-	startBtn.addEventListener("click", startBtnClick);
-	console.log("Connected to the game server");
+        // Buttons will be wired when the tournament modal is opened
+        console.log("Connected to the game server");
 }
 
 function disconnectGameServer(): void {
@@ -184,10 +182,9 @@ function disconnectGameServer(): void {
 	}
 	selectedTournament = null;
 	tournaments = [];
-	renderTournamentList();
-
-	subscribeBtn.removeEventListener("click", subscribeBtnClick);
-	startBtn.removeEventListener("click", startBtnClick);
+        renderTournamentList();
+        // Ensure modal is closed and listeners removed
+        closeTournamentModal();
 }
 
 function startBtnClick(): void {
@@ -200,40 +197,118 @@ function startBtnClick(): void {
 }
 
 function subscribeBtnClick(): void {
-	if (selectedTournament === null) return;
-	const msg: ClientMessage = {
-		type: "subscribe",
-		tournament: selectedTournament,
-	};
-	ws.send(JSON.stringify(msg));
+        if (selectedTournament === null) return;
+        const msg: ClientMessage = {
+                type: "subscribe",
+                tournament: selectedTournament,
+        };
+        ws.send(JSON.stringify(msg));
+}
+
+function unsubscribeBtnClick(): void {
+        if (selectedTournament === null) return;
+        const msg: ClientMessage = {
+                type: "unsubscribe",
+                tournament: selectedTournament,
+        };
+        ws.send(JSON.stringify(msg));
+}
+
+function deleteBtnClick(): void {
+        if (selectedTournament === null) return;
+        const msg: ClientMessage = {
+                type: "delete_tournament",
+                tournament: selectedTournament,
+        };
+        ws.send(JSON.stringify(msg));
 }
 
 // Render list of tournaments
 function renderTournamentList(): void {
-	tournamentList.innerHTML = "";
-	tournaments.forEach((t) => {
-		const li = document.createElement("li");
-		li.textContent = t.name;
-		li.className = "cursor-pointer p-2 hover:bg-gray-100 rounded";
-		li.addEventListener("click", () => selectTournament(t.id));
-		tournamentList.appendChild(li);
-	});
+        tournamentList.innerHTML = "";
+        tournaments.forEach((t) => {
+                const li = document.createElement("li");
+                const subscribed =
+                        userInfo && t.players.some((p) => p.id === userInfo!.id);
+                li.innerHTML = subscribed
+                        ? `${t.name} <span class="ml-1 text-green-400">✓</span>`
+                        : t.name;
+                li.className =
+                        "cursor-pointer p-2 rounded border border-pink-500 text-center ";
+                li.className += subscribed
+                        ? "bg-green-800 text-white"
+                        : "bg-[#1e1e3f] hover:bg-[#2a2a55] text-pink-100";
+                li.addEventListener("click", () => openTournamentModal(t.id));
+                tournamentList.appendChild(li);
+        });
+}
+
+// Open the modal displaying tournament details
+function openTournamentModal(id: number): void {
+        const tpl = document.getElementById("tournament-tpl") as HTMLTemplateElement | null;
+        if (!tpl) return;
+
+        // Remove any existing overlay
+        closeTournamentModal();
+
+        const frag = tpl.content.cloneNode(true) as DocumentFragment;
+        tournamentOverlay = frag.firstElementChild as HTMLElement;
+        document.body.appendChild(tournamentOverlay);
+
+        selectedTitle = tournamentOverlay.querySelector("#selectedTournamentTitle");
+        statusMessage = tournamentOverlay.querySelector("#statusMessage");
+        playerList = tournamentOverlay.querySelector("#playerList");
+        subscribeBtn = tournamentOverlay.querySelector("#subscribeBtn");
+        unsubscribeBtn = tournamentOverlay.querySelector("#unsubscribeBtn");
+        startBtn = tournamentOverlay.querySelector("#startBtn");
+        deleteBtn = tournamentOverlay.querySelector("#deleteBtn");
+
+        tournamentOverlay.querySelector<HTMLButtonElement>(".close-btn")?.addEventListener("click", closeTournamentModal);
+
+        subscribeBtn?.addEventListener("click", subscribeBtnClick);
+        unsubscribeBtn?.addEventListener("click", unsubscribeBtnClick);
+        startBtn?.addEventListener("click", startBtnClick);
+        deleteBtn?.addEventListener("click", deleteBtnClick);
+
+        selectTournament(id);
+}
+
+function closeTournamentModal(): void {
+        subscribeBtn?.removeEventListener("click", subscribeBtnClick);
+        unsubscribeBtn?.removeEventListener("click", unsubscribeBtnClick);
+        startBtn?.removeEventListener("click", startBtnClick);
+        deleteBtn?.removeEventListener("click", deleteBtnClick);
+        tournamentOverlay?.remove();
+        tournamentOverlay = null;
+        selectedTitle = null;
+        statusMessage = null;
+        playerList = null;
+        subscribeBtn = null;
+        unsubscribeBtn = null;
+        startBtn = null;
+        deleteBtn = null;
+        selectedTournament = null;
 }
 
 // Select a tournament
 function selectTournament(id: number): void {
-	console.log("Selected tournament:", id);
-	selectedTournament = id;
+        selectedTournament = id;
 
-	const tournament = tournaments.find((t) => t.id === id) || null;
-	if (!tournament) {
-		selectedTitle.textContent = "Select a tournament";
-		statusMessage.textContent = "No tournament";
-		playerList.innerHTML = "";
-		subscribeBtn.classList.add("hidden");
-		startBtn.classList.add("hidden");
-		return;
-	}
+        if (!selectedTitle || !statusMessage || !playerList || !subscribeBtn || !startBtn) {
+                return;
+        }
+
+        const tournament = tournaments.find((t) => t.id === id) || null;
+        if (!tournament) {
+                selectedTitle.textContent = "Select a tournament";
+                statusMessage.textContent = "No tournament";
+                playerList.innerHTML = "";
+                subscribeBtn.classList.add("hidden");
+                startBtn.classList.add("hidden");
+                unsubscribeBtn?.classList.add("hidden");
+                deleteBtn?.classList.add("hidden");
+                return;
+        }
 
 	selectedTitle.textContent = `Players in "${tournament.name}"`;
 	statusMessage.textContent = tournament.started
@@ -245,24 +320,33 @@ function selectTournament(id: number): void {
 	tournament.players.forEach((player) => {
 		const li = document.createElement("li");
 		li.textContent = player.username;
-		li.className = "border p-2 rounded";
+                li.className =
+                        "border border-pink-500 p-2 rounded bg-[#1e1e3f] text-pink-100 text-center";
 		playerList.appendChild(li);
 	});
 
-	const isCreator = userInfo && userInfo.id === tournament.creator.id;
-	const playerIds = tournament.players.map((p) => p.id);
+        const isCreator = userInfo && userInfo.id === tournament.creator.id;
+        const playerIds = tournament.players.map((p) => p.id);
 
-	if (!tournament.started && userInfo && !playerIds.includes(userInfo.id)) {
-		subscribeBtn.classList.remove("hidden");
-	} else {
-		subscribeBtn.classList.add("hidden");
-	}
+        if (!tournament.started && userInfo && !playerIds.includes(userInfo.id)) {
+                subscribeBtn.classList.remove("hidden");
+        } else {
+                subscribeBtn.classList.add("hidden");
+        }
 
-	if (!tournament.started && isCreator) {
-		startBtn.classList.remove("hidden");
-	} else {
-		startBtn.classList.add("hidden");
-	}
+        if (!tournament.started && userInfo && playerIds.includes(userInfo.id)) {
+                unsubscribeBtn?.classList.remove("hidden");
+        } else {
+                unsubscribeBtn?.classList.add("hidden");
+        }
+
+        if (!tournament.started && isCreator) {
+                startBtn.classList.remove("hidden");
+                deleteBtn?.classList.remove("hidden");
+        } else {
+                startBtn.classList.add("hidden");
+                deleteBtn?.classList.add("hidden");
+        }
 }
 
 // if logged in on page load, connect to the game server
@@ -299,26 +383,31 @@ async function updateGameHeader(
 			Authorization: `Bearer ${localStorage.getItem("token")}`,
 		},
 	});
-	const player1Data = await response.json();
-	if (response.ok && player1Data) {
-		player1Name.textContent = player1Data.username;
-		player1Avatar.src = player1Data.avatar || "default-avatar.svg"; // Fallback avatar
-	}
+        const player1Data = await response.json();
+        if (response.ok && player1Data) {
+                const alias1 = (player1Data.alias ?? "").trim() || player1Data.username;
+                player1Name.textContent = alias1;
+                player1Avatar.src = player1Data.avatar
+                        ? `/uploads/${player1Data.avatar}?_=${Date.now()}`
+                        : "/assets/default-avatar.png";
+        }
 	response = await fetch("/user/" + player2.id, {
 		method: "GET",
 		headers: {
 			Authorization: `Bearer ${localStorage.getItem("token")}`,
 		},
 	});
-	const player2Data = await response.json();
-	if (response.ok && player2Data) {
-		player2Name.textContent = player2Data.username;
-		player2Avatar.src = player2Data.avatar || "default-avatar.svg"; // Fallback avatar
-	}
+        const player2Data = await response.json();
+        if (response.ok && player2Data) {
+                const alias2 = (player2Data.alias ?? "").trim() || player2Data.username;
+                player2Name.textContent = alias2;
+                player2Avatar.src = player2Data.avatar
+                        ? `/uploads/${player2Data.avatar}?_=${Date.now()}`
+                        : "/assets/default-avatar.png";
+        }
 	const player1Score = player1.score || 0;
 	const player2Score = player2.score || 0;
 	scoreDisplay.textContent = `${player1Score} - ${player2Score}`;
-	countDownDisplay.textContent = "5"; // Reset countdown display
 }
 function updateCountDown(time: number): void {
 	countDownDisplay.textContent = time.toString();

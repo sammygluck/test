@@ -3,11 +3,14 @@ import { game } from "../game_websocket/pong_websocket.js";
 const tournamentList = document.getElementById("tournamentList");
 const createTournamentForm = document.getElementById("createTournamentForm");
 const tournamentNameInput = document.getElementById("tournamentName");
-const selectedTitle = document.getElementById("selectedTournamentTitle");
-const playerList = document.getElementById("playerList");
-const subscribeBtn = document.getElementById("subscribeBtn");
-const startBtn = document.getElementById("startBtn");
-const statusMessage = document.getElementById("statusMessage");
+let selectedTitle = null;
+let playerList = null;
+let subscribeBtn = null;
+let unsubscribeBtn = null;
+let startBtn = null;
+let deleteBtn = null;
+let statusMessage = null;
+let tournamentOverlay = null;
 let tournaments = [];
 let selectedTournament = null;
 let userInfo = null;
@@ -59,7 +62,7 @@ function connectGameServer() {
             }
         }
         else if (msg.type === "game") {
-            game.updateGameState(msg);
+            game.receiveMessage(msg);
         }
         else if (msg.type === "nextMatch") {
             const tournamentUpdate = msg;
@@ -81,8 +84,6 @@ function connectGameServer() {
         ws.send(JSON.stringify(msg));
         tournamentNameInput.value = "";
     });
-    subscribeBtn.addEventListener("click", subscribeBtnClick);
-    startBtn.addEventListener("click", startBtnClick);
     console.log("Connected to the game server");
 }
 function disconnectGameServer() {
@@ -94,8 +95,7 @@ function disconnectGameServer() {
     selectedTournament = null;
     tournaments = [];
     renderTournamentList();
-    subscribeBtn.removeEventListener("click", subscribeBtnClick);
-    startBtn.removeEventListener("click", startBtnClick);
+    closeTournamentModal();
 }
 function startBtnClick() {
     if (selectedTournament === null)
@@ -115,19 +115,84 @@ function subscribeBtnClick() {
     };
     ws.send(JSON.stringify(msg));
 }
+function unsubscribeBtnClick() {
+    if (selectedTournament === null)
+        return;
+    const msg = {
+        type: "unsubscribe",
+        tournament: selectedTournament,
+    };
+    ws.send(JSON.stringify(msg));
+}
+function deleteBtnClick() {
+    if (selectedTournament === null)
+        return;
+    const msg = {
+        type: "delete_tournament",
+        tournament: selectedTournament,
+    };
+    ws.send(JSON.stringify(msg));
+}
 function renderTournamentList() {
     tournamentList.innerHTML = "";
     tournaments.forEach((t) => {
         const li = document.createElement("li");
-        li.textContent = t.name;
-        li.className = "cursor-pointer p-2 hover:bg-gray-100 rounded";
-        li.addEventListener("click", () => selectTournament(t.id));
+        const subscribed = userInfo && t.players.some((p) => p.id === userInfo.id);
+        li.innerHTML = subscribed
+            ? `${t.name} <span class="ml-1 text-green-400">✓</span>`
+            : t.name;
+        li.className =
+            "cursor-pointer p-2 rounded border border-pink-500 text-center ";
+        li.className += subscribed
+            ? "bg-green-800 text-white"
+            : "bg-[#1e1e3f] hover:bg-[#2a2a55] text-pink-100";
+        li.addEventListener("click", () => openTournamentModal(t.id));
         tournamentList.appendChild(li);
     });
 }
+function openTournamentModal(id) {
+    const tpl = document.getElementById("tournament-tpl");
+    if (!tpl)
+        return;
+    closeTournamentModal();
+    const frag = tpl.content.cloneNode(true);
+    tournamentOverlay = frag.firstElementChild;
+    document.body.appendChild(tournamentOverlay);
+    selectedTitle = tournamentOverlay.querySelector("#selectedTournamentTitle");
+    statusMessage = tournamentOverlay.querySelector("#statusMessage");
+    playerList = tournamentOverlay.querySelector("#playerList");
+    subscribeBtn = tournamentOverlay.querySelector("#subscribeBtn");
+    unsubscribeBtn = tournamentOverlay.querySelector("#unsubscribeBtn");
+    startBtn = tournamentOverlay.querySelector("#startBtn");
+    deleteBtn = tournamentOverlay.querySelector("#deleteBtn");
+    tournamentOverlay.querySelector(".close-btn")?.addEventListener("click", closeTournamentModal);
+    subscribeBtn?.addEventListener("click", subscribeBtnClick);
+    unsubscribeBtn?.addEventListener("click", unsubscribeBtnClick);
+    startBtn?.addEventListener("click", startBtnClick);
+    deleteBtn?.addEventListener("click", deleteBtnClick);
+    selectTournament(id);
+}
+function closeTournamentModal() {
+    subscribeBtn?.removeEventListener("click", subscribeBtnClick);
+    unsubscribeBtn?.removeEventListener("click", unsubscribeBtnClick);
+    startBtn?.removeEventListener("click", startBtnClick);
+    deleteBtn?.removeEventListener("click", deleteBtnClick);
+    tournamentOverlay?.remove();
+    tournamentOverlay = null;
+    selectedTitle = null;
+    statusMessage = null;
+    playerList = null;
+    subscribeBtn = null;
+    unsubscribeBtn = null;
+    startBtn = null;
+    deleteBtn = null;
+    selectedTournament = null;
+}
 function selectTournament(id) {
-    console.log("Selected tournament:", id);
     selectedTournament = id;
+    if (!selectedTitle || !statusMessage || !playerList || !subscribeBtn || !startBtn) {
+        return;
+    }
     const tournament = tournaments.find((t) => t.id === id) || null;
     if (!tournament) {
         selectedTitle.textContent = "Select a tournament";
@@ -135,6 +200,8 @@ function selectTournament(id) {
         playerList.innerHTML = "";
         subscribeBtn.classList.add("hidden");
         startBtn.classList.add("hidden");
+        unsubscribeBtn?.classList.add("hidden");
+        deleteBtn?.classList.add("hidden");
         return;
     }
     selectedTitle.textContent = `Players in "${tournament.name}"`;
@@ -145,7 +212,8 @@ function selectTournament(id) {
     tournament.players.forEach((player) => {
         const li = document.createElement("li");
         li.textContent = player.username;
-        li.className = "border p-2 rounded";
+        li.className =
+            "border border-pink-500 p-2 rounded bg-[#1e1e3f] text-pink-100 text-center";
         playerList.appendChild(li);
     });
     const isCreator = userInfo && userInfo.id === tournament.creator.id;
@@ -156,11 +224,19 @@ function selectTournament(id) {
     else {
         subscribeBtn.classList.add("hidden");
     }
+    if (!tournament.started && userInfo && playerIds.includes(userInfo.id)) {
+        unsubscribeBtn?.classList.remove("hidden");
+    }
+    else {
+        unsubscribeBtn?.classList.add("hidden");
+    }
     if (!tournament.started && isCreator) {
         startBtn.classList.remove("hidden");
+        deleteBtn?.classList.remove("hidden");
     }
     else {
         startBtn.classList.add("hidden");
+        deleteBtn?.classList.add("hidden");
     }
 }
 if (localStorage.getItem("userInfo")) {
@@ -182,8 +258,11 @@ async function updateGameHeader(tournamentUpdateMessage) {
     });
     const player1Data = await response.json();
     if (response.ok && player1Data) {
-        player1Name.textContent = player1Data.username;
-        player1Avatar.src = player1Data.avatar || "default-avatar.svg";
+        const alias1 = (player1Data.alias ?? "").trim() || player1Data.username;
+        player1Name.textContent = alias1;
+        player1Avatar.src = player1Data.avatar
+            ? `/uploads/${player1Data.avatar}?_=${Date.now()}`
+            : "/assets/default-avatar.png";
     }
     response = await fetch("/user/" + player2.id, {
         method: "GET",
@@ -193,13 +272,15 @@ async function updateGameHeader(tournamentUpdateMessage) {
     });
     const player2Data = await response.json();
     if (response.ok && player2Data) {
-        player2Name.textContent = player2Data.username;
-        player2Avatar.src = player2Data.avatar || "default-avatar.svg";
+        const alias2 = (player2Data.alias ?? "").trim() || player2Data.username;
+        player2Name.textContent = alias2;
+        player2Avatar.src = player2Data.avatar
+            ? `/uploads/${player2Data.avatar}?_=${Date.now()}`
+            : "/assets/default-avatar.png";
     }
     const player1Score = player1.score || 0;
     const player2Score = player2.score || 0;
     scoreDisplay.textContent = `${player1Score} - ${player2Score}`;
-    countDownDisplay.textContent = "5";
 }
 function updateCountDown(time) {
     countDownDisplay.textContent = time.toString();
