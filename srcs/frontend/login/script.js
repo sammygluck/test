@@ -175,5 +175,4 @@ document.getElementById("auth-2fa-button")?.addEventListener("click", () => {
 document.getElementById("auth-2fa-back")?.addEventListener("click", () => {
     document.getElementById("loginPage")?.classList.remove("hidden");
     document.getElementById("twoFactorPage")?.classList.add("hidden");
-});
-export { logout };
+});export { logout };

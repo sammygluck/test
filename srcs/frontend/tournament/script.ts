@@ -292,6 +292,7 @@ function closeTournamentModal(): void {
 
 // Select a tournament
 function selectTournament(id: number): void {
+        console.log("Selected tournament:", id);
         selectedTournament = id;
 
         if (!selectedTitle || !statusMessage || !playerList || !subscribeBtn || !startBtn) {
