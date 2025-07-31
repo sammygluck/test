@@ -138,14 +138,15 @@ function renderTournamentList() {
     tournaments.forEach((t) => {
         const li = document.createElement("li");
         const subscribed = userInfo && t.players.some((p) => p.id === userInfo.id);
-        li.innerHTML = subscribed
-            ? `${t.name} <span class="ml-1 text-green-400">✓</span>`
-            : t.name;
         li.className =
-            "cursor-pointer p-2 rounded border border-pink-500 text-center ";
+            "cursor-pointer p-4 rounded border border-pink-500 text-center shadow hover:shadow-lg transition-shadow ";
         li.className += subscribed
             ? "bg-green-800 text-white"
             : "bg-[#1e1e3f] hover:bg-[#2a2a55] text-pink-100";
+        li.innerHTML = `
+                        <div class="font-semibold">${t.name}${subscribed ? ' <span class="ml-1 text-green-400">✓</span>' : ''}</div>
+                        <div class="text-sm text-pink-300">Creator: ${t.creator.username}</div>
+                        <div class="text-sm text-pink-300">${t.players.length} player${t.players.length !== 1 ? 's' : ''}</div>`;
         li.addEventListener("click", () => openTournamentModal(t.id));
         tournamentList.appendChild(li);
     });
