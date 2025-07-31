@@ -371,9 +371,12 @@ const countDownDisplay = document.getElementById(
 
 // Update game header with player info
 async function updateGameHeader(
-	tournamentUpdateMessage: tournamentUpdateMessage
+        tournamentUpdateMessage: tournamentUpdateMessage
 ): Promise<void> {
-	const { player1, player2 } = tournamentUpdateMessage.data;
+        const { player1, player2 } = tournamentUpdateMessage.data;
+
+        player1Name.dataset.userid = String(player1.id);
+        player2Name.dataset.userid = String(player2.id);
 
 	//player1Name.textContent = player1.username;
 	//player2Name.textContent = player2.username;

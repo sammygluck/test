@@ -189,6 +189,7 @@ function closeTournamentModal() {
     selectedTournament = null;
 }
 function selectTournament(id) {
+    console.log("Selected tournament:", id);
     selectedTournament = id;
     if (!selectedTitle || !statusMessage || !playerList || !subscribeBtn || !startBtn) {
         return;
@@ -250,6 +251,8 @@ const scoreDisplay = document.getElementById("scoreDisplay");
 const countDownDisplay = document.getElementById("countDownDisplay");
 async function updateGameHeader(tournamentUpdateMessage) {
     const { player1, player2 } = tournamentUpdateMessage.data;
+    player1Name.dataset.userid = String(player1.id);
+    player2Name.dataset.userid = String(player2.id);
     let response = await fetch("/user/" + player1.id, {
         method: "GET",
         headers: {
