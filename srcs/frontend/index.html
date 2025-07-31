@@ -100,7 +100,7 @@
 
   <!-- Tournament Page -->
   <div id="tournamentPage" class="route-view flex flex-col gap-6 justify-center items-center w-full p-4">
-    <div class="w-full sm:w-[90%] p-6 rounded-lg bg-[#131325] ring-2 ring-pink-500 shadow-xl text-pink-100 font-['Rubik',sans-serif] flex flex-col mx-auto min-h-[80vh]">
+    <div class="w-full sm:w-[90%] p-6 rounded-lg bg-[#131325] ring-2 ring-pink-500 shadow-xl text-pink-100 font-['Rubik',sans-serif] grid sm:grid-cols-2 gap-6 mx-auto min-h-[60vh]">
       <h2 class="text-pink-400 text-2xl font-['Press_Start_2P',sans-serif] mb-4 text-center">Tournaments</h2>
       <ul id="tournamentList" class="space-y-2 overflow-auto max-h-full flex-1 max-w-md w-full mx-auto"></ul>
       <form id="createTournamentForm" class="mt-6 max-w-md w-full mx-auto">
@@ -152,7 +152,7 @@
 
   <!-- Chat Panel -->
   <div id="chat-block"
-       class="fixed bottom-4 left-1/2 -translate-x-1/2
+       class="fixed bottom-24 left-1/2 -translate-x-1/2
               w-11/12 sm:w-3/4 lg:w-2/3
               h-[30vh] max-h-[360px]
               flex border border-blue-950 bg-blue-50
@@ -203,7 +203,7 @@
 
   <!-- “Chat” SHOW BUTTON (only visible when panel is hidden) -->
   <button id="chat-toggle"
-          class="fixed bottom-4 right-4 z-50
+          class="fixed bottom-24 right-4 z-50
                  px-3 py-2 rounded-full bg-blue-900 text-amber-400
                  font-bold shadow-lg hidden">
     Chat
