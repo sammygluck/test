@@ -12,6 +12,16 @@ declare global {
 let __CURRENT_USER_ID: number | null = null;
 window.__CURRENT_USER_ID = null;
 let _navProfileInitDone = false;
+
+/**
+ * Return an absolute avatar URL for the given value. If the avatar already
+ * contains an "http" prefix it is assumed to be a complete URL. Otherwise the
+ * avatar is served from our uploads folder.
+ */
+export function getAvatarUrl(avatar: string | null): string | null {
+  if (!avatar) return null;
+  return avatar.startsWith("http") ? avatar : `/uploads/${avatar}`;
+}
   
   export interface UserProfileData {
     id: number;
@@ -83,7 +93,7 @@ let _navProfileInitDone = false;
       const navAvatar = document.getElementById("navAvatar") as HTMLImageElement | null;
       if (navAvatar)
         navAvatar.src = data.avatar
-          ? `/uploads/${data.avatar}?_=${Date.now()}`
+          ? `${getAvatarUrl(data.avatar)}?_=${Date.now()}`
           : "/assets/default-avatar.png";
 
       const tf = wireTwoFactor(overlay, data);
@@ -431,7 +441,7 @@ export function initNavProfile(): void {
     const avatar = document.getElementById("navAvatar") as HTMLImageElement | null;
     if (avatar) {
       avatar.dataset.userid = String(me.id);
-      avatar.src = me.avatar ? `/uploads/${me.avatar}?_=${Date.now()}` : "/assets/default-avatar.png";
+      avatar.src = me.avatar ? `${getAvatarUrl(me.avatar)}?_=${Date.now()}` : "/assets/default-avatar.png";
     }
     const nameEl = document.getElementById("navUsername");
     if (nameEl) {

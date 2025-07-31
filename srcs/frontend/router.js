@@ -1,3 +1,4 @@
+import { getAvatarUrl } from "./profile.js";
 const routes = {
     "/home": "home",
     "/login": "loginPage",
@@ -68,7 +69,7 @@ function handleRouteChange() {
         document.getElementById("navUsername").textContent = aliasVal;
         const navAv = document.getElementById("navAvatar");
         if (navAv)
-            navAv.setAttribute("src", user.avatar ? `/uploads/${user.avatar}?_=${Date.now()}` : "/assets/default-avatar.png");
+            navAv.setAttribute("src", user.avatar ? `${getAvatarUrl(user.avatar)}?_=${Date.now()}` : "/assets/default-avatar.png");
         if (path === "/login") {
             history.replaceState({}, "", "/tournament");
             path = "/tournament";
