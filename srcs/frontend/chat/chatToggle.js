@@ -25,12 +25,7 @@ function toggleChat() {
         hideChat();
     }
 }
-if (window.innerWidth < 768) {
-    hideChat();
-}
-else {
-    showChat();
-}
+hideChat();
 hideBtn?.addEventListener('click', toggleChat);
 toggleBtn?.addEventListener('click', showChat);
 window.addEventListener('resize', () => {
