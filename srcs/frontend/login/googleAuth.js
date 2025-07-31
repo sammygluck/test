@@ -1,6 +1,7 @@
 import { handleRouteChange } from "../router.js";
 import { connectGameServer } from "../tournament/script.js";
 import { connectChat } from "../chat/chatWSocket.js";
+import { initNavProfile } from "../profile.js";
 async function handleGoogleCredentialResponse(googleResponse) {
     try {
         const response = await fetch("/googleauth", {
@@ -28,6 +29,7 @@ async function handleGoogleCredentialResponse(googleResponse) {
             handleRouteChange();
             connectGameServer();
             connectChat();
+            initNavProfile();
         }
     }
     catch (error) {
@@ -57,6 +59,7 @@ async function sendUsername(username) {
             handleRouteChange();
             connectGameServer();
             connectChat();
+            initNavProfile();
         }
         else if (response.status === 409 &&
             data.message === "User already exists") {
