@@ -34,6 +34,20 @@ export async function openProfile(userId) {
         overlay.remove();
         return;
     }
+    if (userId === window.__CURRENT_USER_ID) {
+        const buf = localStorage.getItem("userInfo");
+        if (buf) {
+            try {
+                const ui = JSON.parse(buf);
+                ui.alias = data.alias ?? null;
+                ui.username = data.username;
+                ui.avatar = data.avatar ?? null;
+                localStorage.setItem("userInfo", JSON.stringify(ui));
+            }
+            catch {
+            }
+        }
+    }
     renderView(overlay, data);
     wireExtraButtons(overlay, data);
     wireFriendBlock(overlay, data);
@@ -124,6 +138,16 @@ function wireEdit(ov, data, tfHooks) {
                 headers: { Authorization: `Bearer ${token}` },
                 body: fd
             });
+        }
+        const buf = localStorage.getItem("userInfo");
+        if (buf) {
+            try {
+                const ui = JSON.parse(buf);
+                ui.alias = body.alias || null;
+                localStorage.setItem("userInfo", JSON.stringify(ui));
+            }
+            catch {
+            }
         }
         ov.remove();
         void openProfile(data.id);

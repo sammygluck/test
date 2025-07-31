@@ -83,6 +83,22 @@ export function getAvatarUrl(avatar: string | null): string | null {
       overlay.remove();
       return;
     }
+
+    // Keep local userInfo in sync when viewing own profile
+    if (userId === window.__CURRENT_USER_ID) {
+      const buf = localStorage.getItem("userInfo");
+      if (buf) {
+        try {
+          const ui = JSON.parse(buf) as Record<string, unknown>;
+          ui.alias = data.alias ?? null;
+          ui.username = data.username;
+          ui.avatar = data.avatar ?? null;
+          localStorage.setItem("userInfo", JSON.stringify(ui));
+        } catch {
+          /* ignore JSON parse errors */
+        }
+      }
+    }
   
     renderView(overlay, data);
     wireExtraButtons(overlay, data);
@@ -197,7 +213,7 @@ export function getAvatarUrl(avatar: string | null): string | null {
       });
   
       if (!up.ok) { alert("Save failed"); return; }
-  
+
       // Optional avatar upload
       const imgInput = ov.querySelector<HTMLInputElement>("#pr-avatar-in");
       if (imgInput?.files?.length) {
@@ -209,7 +225,19 @@ export function getAvatarUrl(avatar: string | null): string | null {
           body: fd
         });
       }
-  
+
+      // Keep local userInfo somewhat up to date before reloading
+      const buf = localStorage.getItem("userInfo");
+      if (buf) {
+        try {
+          const ui = JSON.parse(buf) as Record<string, unknown>;
+          ui.alias = body.alias || null;
+          localStorage.setItem("userInfo", JSON.stringify(ui));
+        } catch {
+          /* ignore */
+        }
+      }
+
       ov.remove();
       void openProfile(data.id); // reload
     };
