@@ -1,6 +1,11 @@
 let __CURRENT_USER_ID = null;
 window.__CURRENT_USER_ID = null;
 let _navProfileInitDone = false;
+export function getAvatarUrl(avatar) {
+    if (!avatar)
+        return null;
+    return avatar.startsWith("http") ? avatar : `/uploads/${avatar}`;
+}
 export async function openProfile(userId) {
     const tpl = document.getElementById("profile-tpl");
     if (!tpl)
@@ -36,7 +41,7 @@ export async function openProfile(userId) {
         const navAvatar = document.getElementById("navAvatar");
         if (navAvatar)
             navAvatar.src = data.avatar
-                ? `/uploads/${data.avatar}?_=${Date.now()}`
+                ? `${getAvatarUrl(data.avatar)}?_=${Date.now()}`
                 : "/assets/default-avatar.png";
         const tf = wireTwoFactor(overlay, data);
         wireEdit(overlay, data, tf);
@@ -306,7 +311,7 @@ export function initNavProfile() {
         const avatar = document.getElementById("navAvatar");
         if (avatar) {
             avatar.dataset.userid = String(me.id);
-            avatar.src = me.avatar ? `/uploads/${me.avatar}?_=${Date.now()}` : "/assets/default-avatar.png";
+            avatar.src = me.avatar ? `${getAvatarUrl(me.avatar)}?_=${Date.now()}` : "/assets/default-avatar.png";
         }
         const nameEl = document.getElementById("navUsername");
         if (nameEl) {
