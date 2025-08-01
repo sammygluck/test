@@ -221,7 +221,12 @@ function wireExtraButtons(ov, data) {
         const ul = document.createElement("ul");
         rows.forEach(u => {
             const li = document.createElement("li");
-            li.innerHTML = `<span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80" data-userid="${u.id}">${u.username}</span>`;
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = u.username;
+            nameSpan.dataset.userid = String(u.id);
+            nameSpan.className =
+                "view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80";
+            li.appendChild(nameSpan);
             ul.appendChild(li);
         });
         extraBox.replaceChildren(ul);
@@ -267,13 +272,33 @@ function wireExtraButtons(ov, data) {
             let tournament = "";
             if (includeTournament)
                 tournament = g.tournament_name ?? String(g.tournamentId ?? "");
-            const resultClass = youWon ? "text-green-500" : "text-red-500";
-            row.innerHTML =
-                `<td class="px-2">${g.timestamp.slice(0, 10)}</td>` +
-                    `<td class="px-2"><span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80" data-userid="${opponentId}">${opponentName ?? ""}</span></td>` +
-                    `<td class="px-2 ${resultClass}">${youWon ? "Win" : "Loss"}</td>` +
-                    `<td class="px-2">${g.scoreWinner} – ${g.scoreLoser}</td>` +
-                    (includeTournament ? `<td class="px-2">${tournament}</td>` : "");
+            const tdDate = document.createElement("td");
+            tdDate.className = "px-2";
+            tdDate.textContent = g.timestamp.slice(0, 10);
+            row.appendChild(tdDate);
+            const tdOpponent = document.createElement("td");
+            tdOpponent.className = "px-2";
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = opponentName ?? "";
+            nameSpan.dataset.userid = String(opponentId);
+            nameSpan.className =
+                "view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80";
+            tdOpponent.appendChild(nameSpan);
+            row.appendChild(tdOpponent);
+            const tdResult = document.createElement("td");
+            tdResult.className = `px-2 ${youWon ? "text-green-500" : "text-red-500"}`;
+            tdResult.textContent = youWon ? "Win" : "Loss";
+            row.appendChild(tdResult);
+            const tdScore = document.createElement("td");
+            tdScore.className = "px-2";
+            tdScore.textContent = `${g.scoreWinner} – ${g.scoreLoser}`;
+            row.appendChild(tdScore);
+            if (includeTournament) {
+                const tdTournament = document.createElement("td");
+                tdTournament.className = "px-2";
+                tdTournament.textContent = tournament;
+                row.appendChild(tdTournament);
+            }
             tb.appendChild(row);
         });
         tbl.appendChild(tb);
