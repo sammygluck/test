@@ -224,9 +224,9 @@ function deleteBtnClick(): void {
 }
 
 // Render list of tournaments
-function renderTournamentList(): void {
+async function renderTournamentList(): Promise<void> {
         tournamentList.innerHTML = "";
-        tournaments.forEach((t) => {
+        for (const t of tournaments) {
                 const li = document.createElement("li");
                 const subscribed =
                         userInfo && t.players.some((p) => p.id === userInfo!.id);
@@ -235,13 +235,28 @@ function renderTournamentList(): void {
                 li.className += subscribed
                         ? "bg-green-800 text-white"
                         : "bg-[#1e1e3f] hover:bg-[#2a2a55] text-pink-100";
+
+                let creatorName = t.creator.username;
+                try {
+                        const res = await fetch(`/user/${t.creator.id}`, {
+                                method: "GET",
+                                headers: {
+                                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                },
+                        });
+                        const data = await res.json();
+                        if (res.ok && data) {
+                                creatorName = (data.alias ?? "").trim() || data.username;
+                        }
+                } catch (e) {}
+
                 li.innerHTML = `
                         <div class="font-semibold">${t.name}${subscribed ? ' <span class="ml-1 text-green-400">✓</span>' : ''}</div>
-                        <div class="text-sm text-pink-300">Creator: ${t.creator.username}</div>
+                        <div class="text-sm text-pink-300">Creator: ${creatorName}</div>
                         <div class="text-sm text-pink-300">${t.players.length} player${t.players.length !== 1 ? 's' : ''}</div>`;
                 li.addEventListener("click", () => openTournamentModal(t.id));
                 tournamentList.appendChild(li);
-        });
+        }
 }
 
 // Open the modal displaying tournament details
@@ -292,7 +307,7 @@ function closeTournamentModal(): void {
 }
 
 // Select a tournament
-function selectTournament(id: number): void {
+async function selectTournament(id: number): Promise<void> {
         console.log("Selected tournament:", id);
         selectedTournament = id;
 
@@ -312,20 +327,49 @@ function selectTournament(id: number): void {
                 return;
         }
 
-	selectedTitle.textContent = `Players in "${tournament.name}"`;
-	statusMessage.textContent = tournament.started
-		? "🏁 This tournament is starting."
-		: `Creator: ${tournament.creator.username}`;
+        selectedTitle.textContent = `Players in "${tournament.name}"`;
+
+        let creatorName = tournament.creator.username;
+        try {
+                const res = await fetch(`/user/${tournament.creator.id}`, {
+                        method: "GET",
+                        headers: {
+                                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        },
+                });
+                const data = await res.json();
+                if (res.ok && data) {
+                        creatorName = (data.alias ?? "").trim() || data.username;
+                }
+        } catch (e) {}
+
+        statusMessage.textContent = tournament.started
+                ? "🏁 This tournament is starting."
+                : `Creator: ${creatorName}`;
 
 	// Render players
-	playerList.innerHTML = "";
-	tournament.players.forEach((player) => {
-		const li = document.createElement("li");
-		li.textContent = player.username;
+        playerList.innerHTML = "";
+        for (const player of tournament.players) {
+                let playerName = player.username;
+                try {
+                        const res = await fetch(`/user/${player.id}`, {
+                                method: "GET",
+                                headers: {
+                                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                },
+                        });
+                        const data = await res.json();
+                        if (res.ok && data) {
+                                playerName = (data.alias ?? "").trim() || data.username;
+                        }
+                } catch (e) {}
+
+                const li = document.createElement("li");
+                li.textContent = playerName;
                 li.className =
                         "border border-pink-500 p-2 rounded bg-[#1e1e3f] text-pink-100 text-center";
-		playerList.appendChild(li);
-	});
+                playerList.appendChild(li);
+        }
 
         const isCreator = userInfo && userInfo.id === tournament.creator.id;
         const playerIds = tournament.players.map((p) => p.id);

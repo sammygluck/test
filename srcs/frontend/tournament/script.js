@@ -133,9 +133,9 @@ function deleteBtnClick() {
     };
     ws.send(JSON.stringify(msg));
 }
-function renderTournamentList() {
+async function renderTournamentList() {
     tournamentList.innerHTML = "";
-    tournaments.forEach((t) => {
+    for (const t of tournaments) {
         const li = document.createElement("li");
         const subscribed = userInfo && t.players.some((p) => p.id === userInfo.id);
         li.className =
@@ -143,13 +143,27 @@ function renderTournamentList() {
         li.className += subscribed
             ? "bg-green-800 text-white"
             : "bg-[#1e1e3f] hover:bg-[#2a2a55] text-pink-100";
+        let creatorName = t.creator.username;
+        try {
+            const res = await fetch(`/user/${t.creator.id}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            const data = await res.json();
+            if (res.ok && data) {
+                creatorName = (data.alias ?? "").trim() || data.username;
+            }
+        }
+        catch (e) { }
         li.innerHTML = `
                         <div class="font-semibold">${t.name}${subscribed ? ' <span class="ml-1 text-green-400">✓</span>' : ''}</div>
-                        <div class="text-sm text-pink-300">Creator: ${t.creator.username}</div>
+                        <div class="text-sm text-pink-300">Creator: ${creatorName}</div>
                         <div class="text-sm text-pink-300">${t.players.length} player${t.players.length !== 1 ? 's' : ''}</div>`;
         li.addEventListener("click", () => openTournamentModal(t.id));
         tournamentList.appendChild(li);
-    });
+    }
 }
 function openTournamentModal(id) {
     const tpl = document.getElementById("tournament-tpl");
@@ -189,7 +203,7 @@ function closeTournamentModal() {
     deleteBtn = null;
     selectedTournament = null;
 }
-function selectTournament(id) {
+async function selectTournament(id) {
     console.log("Selected tournament:", id);
     selectedTournament = id;
     if (!selectedTitle || !statusMessage || !playerList || !subscribeBtn || !startBtn) {
@@ -207,17 +221,45 @@ function selectTournament(id) {
         return;
     }
     selectedTitle.textContent = `Players in "${tournament.name}"`;
+    let creatorName = tournament.creator.username;
+    try {
+        const res = await fetch(`/user/${tournament.creator.id}`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        const data = await res.json();
+        if (res.ok && data) {
+            creatorName = (data.alias ?? "").trim() || data.username;
+        }
+    }
+    catch (e) { }
     statusMessage.textContent = tournament.started
         ? "🏁 This tournament is starting."
-        : `Creator: ${tournament.creator.username}`;
+        : `Creator: ${creatorName}`;
     playerList.innerHTML = "";
-    tournament.players.forEach((player) => {
+    for (const player of tournament.players) {
+        let playerName = player.username;
+        try {
+            const res = await fetch(`/user/${player.id}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            const data = await res.json();
+            if (res.ok && data) {
+                playerName = (data.alias ?? "").trim() || data.username;
+            }
+        }
+        catch (e) { }
         const li = document.createElement("li");
-        li.textContent = player.username;
+        li.textContent = playerName;
         li.className =
             "border border-pink-500 p-2 rounded bg-[#1e1e3f] text-pink-100 text-center";
         playerList.appendChild(li);
-    });
+    }
     const isCreator = userInfo && userInfo.id === tournament.creator.id;
     const playerIds = tournament.players.map((p) => p.id);
     if (!tournament.started && userInfo && !playerIds.includes(userInfo.id)) {
