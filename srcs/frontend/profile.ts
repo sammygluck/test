@@ -367,13 +367,14 @@ export interface GameHistoryRow {
         const row = document.createElement("tr");
         const youWon = g.winnerId === data.id;
         const opponentName = youWon ? g.loser_username : g.winner_username;
+        const opponentId = youWon ? g.loserId : g.winnerId;
         let tournament = "";
         if (includeTournament)
           tournament = g.tournament_name ?? String(g.tournamentId ?? "");
 
         row.innerHTML =
           `<td class="px-2">${g.timestamp.slice(0, 10)}</td>` +
-          `<td class="px-2">${opponentName ?? ""}</td>` +
+          `<td class="px-2"><span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80" data-userid="${opponentId}">${opponentName ?? ""}</span></td>` +
           `<td class="px-2">${youWon ? "Win" : "Loss"}</td>` +
           `<td class="px-2">${g.scoreWinner} – ${g.scoreLoser}</td>` +
           (includeTournament ? `<td class="px-2">${tournament}</td>` : "");
