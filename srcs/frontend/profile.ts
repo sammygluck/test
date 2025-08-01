@@ -421,7 +421,9 @@ export interface GameHistoryRow {
 
         const tdScore = document.createElement("td");
         tdScore.className = "px-2";
-        tdScore.textContent = `${g.scoreWinner} – ${g.scoreLoser}`;
+        const yourScore = youWon ? g.scoreWinner : g.scoreLoser;
+        const oppScore  = youWon ? g.scoreLoser : g.scoreWinner;
+        tdScore.textContent = `${yourScore} – ${oppScore}`;
         row.appendChild(tdScore);
 
         if (includeTournament) {
