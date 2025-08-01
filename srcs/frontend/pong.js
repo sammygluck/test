@@ -226,8 +226,6 @@ class Game {
             }
             else {
                 countdownEl.textContent = n.toString();
-                SFX.countdown.currentTime = 0;
-                SFX.countdown.play();
             }
         }, 800);
     }

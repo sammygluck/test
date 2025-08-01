@@ -277,8 +277,7 @@ class Game {
         callback();
       } else {
         countdownEl.textContent = n.toString();
-        SFX.countdown.currentTime = 0;
-        SFX.countdown.play();
+        /* play the countdown sound only once at the beginning */
       }
     }, 800);
   }
