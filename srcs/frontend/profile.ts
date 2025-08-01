@@ -303,8 +303,17 @@ export interface GameHistoryRow {
     const histBtn    = ov.querySelector<HTMLButtonElement>("#pr-history")!;
     const extraBox   = ov.querySelector<HTMLElement>("#pr-extra")!;
     const token      = localStorage.getItem("token");
+
+    let currentView: "friends" | "history" | null = null;
   
     friendsBtn.onclick = async () => {
+      if (currentView === "friends") {
+        extraBox.replaceChildren();
+        currentView = null;
+        return;
+      }
+
+      currentView = "friends";
       extraBox.innerHTML = "<p>Loading…</p>";
       let rows: FriendRow[] = [];
       try {
@@ -315,12 +324,12 @@ export interface GameHistoryRow {
       } catch {
         /* ignore */
       }
-  
+
       if (!Array.isArray(rows) || !rows.length) {
         extraBox.textContent = "No friends to show.";
         return;
       }
-  
+
       const ul = document.createElement("ul");
       rows.forEach(u => {
         const li = document.createElement("li");
@@ -331,6 +340,13 @@ export interface GameHistoryRow {
     };
   
     histBtn.onclick = async () => {
+      if (currentView === "history") {
+        extraBox.replaceChildren();
+        currentView = null;
+        return;
+      }
+
+      currentView = "history";
       extraBox.innerHTML = "<p>Loading…</p>";
       let games: GameHistoryRow[] = [];
       try {
