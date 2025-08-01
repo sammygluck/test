@@ -14,6 +14,7 @@ const SFX = {
     wall: document.getElementById('sndWall'),
     paddle: document.getElementById('sndPaddle'),
     score: document.getElementById('sndScore'),
+    countdown: document.getElementById('sndCountdown'),
 };
 class Paddle {
     x;
@@ -214,6 +215,8 @@ class Game {
         countdownEl.classList.remove('hidden');
         let n = 3;
         countdownEl.textContent = n.toString();
+        SFX.countdown.currentTime = 0;
+        SFX.countdown.play();
         const iv = setInterval(() => {
             n--;
             if (n === 0) {
@@ -223,6 +226,8 @@ class Game {
             }
             else {
                 countdownEl.textContent = n.toString();
+                SFX.countdown.currentTime = 0;
+                SFX.countdown.play();
             }
         }, 800);
     }
