@@ -592,15 +592,19 @@ fastify.get("/friends/:id",
   );
   
   /* ----------  GET /history/:id  ---------- */
-  // Deprecated: use /matchhistory/:id instead. Keep for backward compatibility
   fastify.get("/history/:id",
-        { onRequest:[fastify.authenticate] },
-        async (req, reply) => {
-          const limit = req.query.limit ? parseInt(req.query.limit) : 20;
-          const offset = req.query.offset ? parseInt(req.query.offset) : 0;
-          const redirectUrl = `/matchhistory/${req.params.id}?limit=${limit}&offset=${offset}`;
-          reply.redirect(302, redirectUrl);
-        }
+	{ onRequest:[fastify.authenticate] },
+	async (req, reply) => {
+	  return await fastify.sqlite.all(
+		`SELECT timestamp, winnerId, loserId,
+				scoreWinner, scoreLoser
+		 FROM   game_history
+		 WHERE  winnerId = ? OR loserId = ?
+		 ORDER  BY timestamp DESC
+		 LIMIT  20`,
+		[req.params.id, req.params.id]
+	  );
+	}
   );
   
 }
