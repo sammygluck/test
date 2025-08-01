@@ -231,6 +231,7 @@ function wireExtraButtons(ov, data) {
         });
         extraBox.replaceChildren(ul);
     };
+    let historyPage = 1;
     histBtn.onclick = async () => {
         if (currentView === "history") {
             extraBox.replaceChildren();
@@ -238,10 +239,14 @@ function wireExtraButtons(ov, data) {
             return;
         }
         currentView = "history";
+        historyPage = 1;
+        await loadHistoryPage();
+    };
+    async function loadHistoryPage() {
         extraBox.innerHTML = "<p>Loading…</p>";
         let games = [];
         try {
-            const r = await fetch(`/matchhistory/${data.id}`, {
+            const r = await fetch(`/matchhistory/${data.id}?page=${historyPage}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             games = (await r.json());
@@ -249,7 +254,7 @@ function wireExtraButtons(ov, data) {
         catch {
         }
         if (!Array.isArray(games) || !games.length) {
-            extraBox.textContent = "No matches yet.";
+            extraBox.textContent = historyPage === 1 ? "No matches yet." : "No more matches.";
             return;
         }
         const tbl = document.createElement("table");
@@ -305,8 +310,25 @@ function wireExtraButtons(ov, data) {
             tb.appendChild(row);
         });
         tbl.appendChild(tb);
-        extraBox.replaceChildren(tbl);
-    };
+        const nav = document.createElement("div");
+        nav.className = "flex justify-between mt-2";
+        const prev = document.createElement("button");
+        prev.textContent = "Prev";
+        prev.className = "px-2 py-1 bg-blue-500 text-white rounded disabled:opacity-50";
+        prev.disabled = historyPage === 1;
+        prev.onclick = () => { if (historyPage > 1) {
+            historyPage--;
+            loadHistoryPage();
+        } };
+        const next = document.createElement("button");
+        next.textContent = "Next";
+        next.className = "px-2 py-1 bg-blue-500 text-white rounded disabled:opacity-50";
+        next.disabled = games.length < 20;
+        next.onclick = () => { historyPage++; loadHistoryPage(); };
+        nav.appendChild(prev);
+        nav.appendChild(next);
+        extraBox.replaceChildren(tbl, nav);
+    }
 }
 function wireFriendBlock(ov, data) {
     const friendBtn = ov.querySelector("#pr-friend-action");
