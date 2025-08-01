@@ -12,10 +12,10 @@ async function routes(fastify, options) {
 		},
 		async (request, reply) => {
 			try {
-				const result = await fastify.sqlite.get(
-					"SELECT users.id, users.username, users.email, users.created_at, users.updated_at, users.blocked_users, users.friends, users.avatar, users.full_name, users.two_factor_auth FROM users WHERE id = ?",
-					[request.params.id]
-				);
+                                const result = await fastify.sqlite.get(
+                                        "SELECT users.id, users.username, users.alias, users.email, users.created_at, users.updated_at, users.blocked_users, users.friends, users.avatar, users.full_name, users.two_factor_auth FROM users WHERE id = ?",
+                                        [request.params.id]
+                                );
 				if (!result) {
 					reply.statusCode = 404;
 					return { error: "User not found" };
@@ -52,7 +52,7 @@ async function routes(fastify, options) {
 		async (request, reply) => {
 			try {
                                 const result = await fastify.sqlite.get(
-                                        "SELECT users.id, users.username, users.email, users.created_at, users.updated_at, users.blocked_users, users.friends, users.avatar, users.two_factor_auth FROM users WHERE id = ?",
+                                        "SELECT users.id, users.username, users.alias, users.email, users.created_at, users.updated_at, users.blocked_users, users.friends, users.avatar, users.two_factor_auth FROM users WHERE id = ?",
                                         [request.user.id]
                                 );
 				if (!result) {

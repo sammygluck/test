@@ -10,26 +10,41 @@ const db = new sqlite3.Database("../db/db.sqlite", (err) => {
 //friends is a json array, for example  '["2", "3", "5", "7"]'
 
 db.run(
-	`CREATE TABLE IF NOT EXISTS users (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	username TEXT NOT NULL UNIQUE,
-	full_name TEXT DEFAULT NULL,
-	email TEXT NOT NULL UNIQUE,
-	password_hash TEXT,
+        `CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        alias TEXT DEFAULT NULL,
+        full_name TEXT DEFAULT NULL,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT,
 	created_at TEXT DEFAULT CURRENT_TIMESTAMP,
 	updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
 	google_sign_in BOOLEAN DEFAULT FALSE,
 	two_factor_auth	BOOLEAN DEFAULT FALSE,
 	blocked_users TEXT DEFAULT NULL,
 	friends TEXT DEFAULT NULL,
-	avatar TEXT DEFAULT NULL
-	)`,
-	(err) => {
-		if (err) {
-			console.error(err.message);
-		}
-	}
+        avatar TEXT DEFAULT NULL
+        )`,
+        (err) => {
+                if (err) {
+                        console.error(err.message);
+                }
+        }
 );
+
+// Add alias column for existing databases
+db.all("PRAGMA table_info(users)", (err, rows) => {
+        if (err) {
+                console.error(err.message);
+                return;
+        }
+        const hasAlias = rows.some((row) => row.name === "alias");
+        if (!hasAlias) {
+                db.run("ALTER TABLE users ADD COLUMN alias TEXT", (err2) => {
+                        if (err2) console.error(err2.message);
+                });
+        }
+});
 
 db.run(`
 	CREATE TABLE IF NOT EXISTS game_history (
