@@ -230,14 +230,30 @@ function wireExtraButtons(ov, data) {
             return;
         }
         const tbl = document.createElement("table");
-        tbl.className = "w-full";
+        tbl.className = "w-full table-auto";
+        const includeTournament = games.length && ("tournament_name" in games[0] || "tournamentId" in games[0]);
         tbl.innerHTML =
-            "<thead><tr><th>Date</th><th>Result</th><th>Score</th></tr></thead>";
+            `<thead class="text-left"><tr>` +
+                `<th class="px-2">Date</th>` +
+                `<th class="px-2">Opponent</th>` +
+                `<th class="px-2">Result</th>` +
+                `<th class="px-2">Score</th>` +
+                (includeTournament ? `<th class="px-2">Tournament</th>` : "") +
+                `</tr></thead>`;
         const tb = document.createElement("tbody");
         games.forEach(g => {
             const row = document.createElement("tr");
             const youWon = g.winnerId === data.id;
-            row.innerHTML = `<td>${g.timestamp.slice(0, 10)}</td><td>${youWon ? "Win" : "Loss"}</td><td>${g.scoreWinner} – ${g.scoreLoser}</td>`;
+            const opponentId = youWon ? g.loserId : g.winnerId;
+            let tournament = "";
+            if (includeTournament)
+                tournament = g.tournament_name ?? String(g.tournamentId ?? "");
+            row.innerHTML =
+                `<td class="px-2">${g.timestamp.slice(0, 10)}</td>` +
+                    `<td class="px-2">${opponentId ?? ""}</td>` +
+                    `<td class="px-2">${youWon ? "Win" : "Loss"}</td>` +
+                    `<td class="px-2">${g.scoreWinner} – ${g.scoreLoser}</td>` +
+                    (includeTournament ? `<td class="px-2">${tournament}</td>` : "");
             tb.appendChild(row);
         });
         tbl.appendChild(tb);
