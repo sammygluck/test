@@ -187,7 +187,7 @@ histBtn.onclick = async () => {
   }
 
   const tbl = document.createElement("table");
-  tbl.className = "w-full";
+  tbl.className = "w-full table-auto";
   tbl.innerHTML =
     "<thead><tr><th>Date</th><th>Result</th><th>Score</th></tr></thead>";
   const tb = document.createElement("tbody");
@@ -195,9 +195,9 @@ histBtn.onclick = async () => {
     const row = document.createElement("tr");
     const youWon = +g.winnerId === +data.id;
     row.innerHTML =
-      `<td>${g.timestamp.slice(0,10)}</td>
-       <td>${youWon ? "Win" : "Loss"}</td>
-       <td>${g.scoreWinner} – ${g.scoreLoser}</td>`;
+      `<td class="break-words">${g.timestamp.slice(0,10)}</td>
+       <td class="break-words">${youWon ? "Win" : "Loss"}</td>
+       <td class="break-words">${g.scoreWinner} – ${g.scoreLoser}</td>`;
     tb.appendChild(row);
   });
   tbl.appendChild(tb);
