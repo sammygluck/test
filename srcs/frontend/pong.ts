@@ -37,6 +37,7 @@ const SFX = {
   wall   : document.getElementById('sndWall')   as HTMLAudioElement,
   paddle : document.getElementById('sndPaddle') as HTMLAudioElement,
   score  : document.getElementById('sndScore')  as HTMLAudioElement,
+  countdown : document.getElementById('sndCountdown') as HTMLAudioElement,
 };
 
 /* ------------------------------------------------------------------------
@@ -266,6 +267,8 @@ class Game {
     countdownEl.classList.remove('hidden');
     let n = 3;
     countdownEl.textContent = n.toString();
+    SFX.countdown.currentTime = 0;
+    SFX.countdown.play();
     const iv = setInterval(() => {
       n--;
       if (n === 0) {
@@ -274,6 +277,8 @@ class Game {
         callback();
       } else {
         countdownEl.textContent = n.toString();
+        SFX.countdown.currentTime = 0;
+        SFX.countdown.play();
       }
     }, 800);
   }
