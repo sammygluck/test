@@ -273,8 +273,9 @@ function wireExtraButtons(ov, data) {
             if (includeTournament)
                 tournament = g.tournament_name ?? String(g.tournamentId ?? "");
             const tdDate = document.createElement("td");
-            tdDate.className = "px-2";
-            tdDate.textContent = g.timestamp.slice(0, 10);
+            tdDate.className = "px-2 whitespace-nowrap";
+            const date = new Date(g.timestamp);
+            tdDate.textContent = date.toLocaleString();
             row.appendChild(tdDate);
             const tdOpponent = document.createElement("td");
             tdOpponent.className = "px-2";
