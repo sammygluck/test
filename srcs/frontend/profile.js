@@ -249,10 +249,11 @@ function wireExtraButtons(ov, data) {
             let tournament = "";
             if (includeTournament)
                 tournament = g.tournament_name ?? String(g.tournamentId ?? "");
+            const resultClass = youWon ? "text-green-500" : "text-red-500";
             row.innerHTML =
                 `<td class="px-2">${g.timestamp.slice(0, 10)}</td>` +
                     `<td class="px-2"><span class="view-profile cursor-pointer text-[color:var(--link,#06c)] hover:underline hover:opacity-80" data-userid="${opponentId}">${opponentName ?? ""}</span></td>` +
-                    `<td class="px-2">${youWon ? "Win" : "Loss"}</td>` +
+                    `<td class="px-2 ${resultClass}">${youWon ? "Win" : "Loss"}</td>` +
                     `<td class="px-2">${g.scoreWinner} – ${g.scoreLoser}</td>` +
                     (includeTournament ? `<td class="px-2">${tournament}</td>` : "");
             tb.appendChild(row);
