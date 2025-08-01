@@ -254,6 +254,8 @@ async function updateGameHeader(tournamentUpdateMessage) {
     const { player1, player2 } = tournamentUpdateMessage.data;
     player1Name.dataset.userid = String(player1.id);
     player2Name.dataset.userid = String(player2.id);
+    player1Avatar.dataset.userid = String(player1.id);
+    player2Avatar.dataset.userid = String(player2.id);
     let response = await fetch("/user/" + player1.id, {
         method: "GET",
         headers: {

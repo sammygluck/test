@@ -378,6 +378,8 @@ async function updateGameHeader(
 
         player1Name.dataset.userid = String(player1.id);
         player2Name.dataset.userid = String(player2.id);
+        player1Avatar.dataset.userid = String(player1.id);
+        player2Avatar.dataset.userid = String(player2.id);
 
 	//player1Name.textContent = player1.username;
 	//player2Name.textContent = player2.username;
