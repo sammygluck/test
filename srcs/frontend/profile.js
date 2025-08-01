@@ -57,6 +57,11 @@ export async function openProfile(userId) {
             navAvatar.src = data.avatar
                 ? `${getAvatarUrl(data.avatar)}?_=${Date.now()}`
                 : "/assets/default-avatar.png";
+        const nameEl = document.getElementById("navUsername");
+        if (nameEl) {
+            const aliasVal = (data.alias ?? "").trim() || data.username;
+            nameEl.textContent = aliasVal;
+        }
         const tf = wireTwoFactor(overlay, data);
         wireEdit(overlay, data, tf);
     }

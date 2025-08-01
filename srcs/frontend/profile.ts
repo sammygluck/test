@@ -117,6 +117,12 @@ export interface GameHistoryRow {
           ? `${getAvatarUrl(data.avatar)}?_=${Date.now()}`
           : "/assets/default-avatar.png";
 
+      const nameEl = document.getElementById("navUsername") as HTMLElement | null;
+      if (nameEl) {
+        const aliasVal = (data.alias ?? "").trim() || data.username;
+        nameEl.textContent = aliasVal;
+      }
+
       const tf = wireTwoFactor(overlay, data);
       wireEdit(overlay, data, tf);
     }
