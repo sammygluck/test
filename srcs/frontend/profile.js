@@ -218,7 +218,7 @@ function wireExtraButtons(ov, data) {
         extraBox.innerHTML = "<p>Loading…</p>";
         let games = [];
         try {
-            const r = await fetch(`/history/${data.id}`, {
+            const r = await fetch(`/matchhistory/${data.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             games = (await r.json());
@@ -244,13 +244,13 @@ function wireExtraButtons(ov, data) {
         games.forEach(g => {
             const row = document.createElement("tr");
             const youWon = g.winnerId === data.id;
-            const opponentId = youWon ? g.loserId : g.winnerId;
+            const opponentName = youWon ? g.loser_username : g.winner_username;
             let tournament = "";
             if (includeTournament)
                 tournament = g.tournament_name ?? String(g.tournamentId ?? "");
             row.innerHTML =
                 `<td class="px-2">${g.timestamp.slice(0, 10)}</td>` +
-                    `<td class="px-2">${opponentId ?? ""}</td>` +
+                    `<td class="px-2">${opponentName ?? ""}</td>` +
                     `<td class="px-2">${youWon ? "Win" : "Loss"}</td>` +
                     `<td class="px-2">${g.scoreWinner} – ${g.scoreLoser}</td>` +
                     (includeTournament ? `<td class="px-2">${tournament}</td>` : "");

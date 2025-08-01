@@ -41,13 +41,17 @@ export function getAvatarUrl(avatar: string | null): string | null {
     username: string;
   }
   
-  export interface GameHistoryRow {
-    timestamp: string;        // ISO string
-    winnerId: number;
-    loserId?: number;
-    scoreWinner: number;
-    scoreLoser: number;
-  }
+export interface GameHistoryRow {
+  timestamp: string;        // ISO string
+  winnerId: number;
+  loserId?: number;
+  scoreWinner: number;
+  scoreLoser: number;
+  winner_username: string;
+  loser_username: string;
+  tournament_name?: string;
+  tournamentId?: number;
+}
   
   /** -------------------------------------------------------------------------
    *  Main entry – opens an overlay showing the user profile
@@ -330,7 +334,7 @@ export function getAvatarUrl(avatar: string | null): string | null {
       extraBox.innerHTML = "<p>Loading…</p>";
       let games: GameHistoryRow[] = [];
       try {
-        const r = await fetch(`/history/${data.id}`, {
+        const r = await fetch(`/matchhistory/${data.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         games = (await r.json()) as GameHistoryRow[];
@@ -362,14 +366,14 @@ export function getAvatarUrl(avatar: string | null): string | null {
       games.forEach(g => {
         const row = document.createElement("tr");
         const youWon = g.winnerId === data.id;
-        const opponentId = youWon ? (g as any).loserId : g.winnerId;
+        const opponentName = youWon ? g.loser_username : g.winner_username;
         let tournament = "";
         if (includeTournament)
-          tournament = (g as any).tournament_name ?? String((g as any).tournamentId ?? "");
+          tournament = g.tournament_name ?? String(g.tournamentId ?? "");
 
         row.innerHTML =
           `<td class="px-2">${g.timestamp.slice(0, 10)}</td>` +
-          `<td class="px-2">${opponentId ?? ""}</td>` +
+          `<td class="px-2">${opponentName ?? ""}</td>` +
           `<td class="px-2">${youWon ? "Win" : "Loss"}</td>` +
           `<td class="px-2">${g.scoreWinner} – ${g.scoreLoser}</td>` +
           (includeTournament ? `<td class="px-2">${tournament}</td>` : "");
