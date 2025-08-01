@@ -191,7 +191,14 @@ function wireExtraButtons(ov, data) {
     const histBtn = ov.querySelector("#pr-history");
     const extraBox = ov.querySelector("#pr-extra");
     const token = localStorage.getItem("token");
+    let currentView = null;
     friendsBtn.onclick = async () => {
+        if (currentView === "friends") {
+            extraBox.replaceChildren();
+            currentView = null;
+            return;
+        }
+        currentView = "friends";
         extraBox.innerHTML = "<p>Loading…</p>";
         let rows = [];
         try {
@@ -215,6 +222,12 @@ function wireExtraButtons(ov, data) {
         extraBox.replaceChildren(ul);
     };
     histBtn.onclick = async () => {
+        if (currentView === "history") {
+            extraBox.replaceChildren();
+            currentView = null;
+            return;
+        }
+        currentView = "history";
         extraBox.innerHTML = "<p>Loading…</p>";
         let games = [];
         try {
